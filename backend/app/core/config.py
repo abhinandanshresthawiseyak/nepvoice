@@ -1,0 +1,7 @@
+SECRET_KEY = "3e7b8c3f60dc4a1e4f56739a8c15f4b9" # For Session middleware 
+POSTGRES_DB = ""
+POSTGRES_USER = ""
+POSTGRES_PASSWORD = ""
+POSTGRES_HOST=""
+POSTGRES_PORT="" 
+
