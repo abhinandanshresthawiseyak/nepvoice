@@ -1,0 +1,36 @@
+version: '3.7'
+
+services:
+  nepvoice-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5678:5678"
+    depends_on:
+      - nepvoice-database
+    environment:
+      - DATABASE_URL=postgresql://nepvoice:nepvoice@nepvoice-database/nepvoice
+      - CLIENT_ID=your-client-id
+      - CLIENT_SECRET=your-client-secret
+      - REDIRECT_URI=your-redirect-uri
+      - AUTH_URI=your-auth-uri
+      - TOKEN_URI=your-token-uri
+      - USERINFO_URI=your-userinfo-uri
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+
+  nepvoice-database:
+    image: postgres:latest  # This will pull the latest version of PostgreSQL
+    environment:
+      POSTGRES_USER: nepvoice
+      POSTGRES_PASSWORD: nepvoice
+      POSTGRES_DB: nepvoice
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

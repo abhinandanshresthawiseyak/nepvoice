@@ -1,1 +1,8 @@
-#
+fastapi
+uvicorn
+httpx
+sqlalchemy
+databases
+python-dotenv
+pytz
+psycopg2-binary

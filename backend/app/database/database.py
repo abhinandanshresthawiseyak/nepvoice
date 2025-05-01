@@ -15,3 +15,12 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
+
+# Dependency to get the database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
