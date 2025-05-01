@@ -1,16 +1,14 @@
 from fastapi import FastAPI
-from app.api.v1.endpoints.auth import auth
-from app.api.v1.endpoints import dashboard
-from app.core.config import CLIENT_ID, CLIENT_SECRET, REDIRECT_URI
+from app.api.v1.endpoints import features  # Import features endpoints
+from app.api.v1.endpoints import credit  # If credit is part of your endpoints
+from app.api.v1.endpoints import oauth  # If oauth is part of your endpoints
 
-# FastAPI app
+# Initialize FastAPI app
 app = FastAPI()
 
-# Example usage of configuration
-@app.on_event("startup")
-async def startup():
-    print(f"Starting with CLIENT_ID: {CLIENT_ID}, CLIENT_SECRET: {CLIENT_SECRET}")
+# Include the routers for each feature, credit, and oauth
+app.include_router(features.router, prefix="/api/v1", tags=["features"])
+app.include_router(credit.router, prefix="/api/v1", tags=["credit"])
+app.include_router(oauth.router, prefix="/api/v1", tags=["auth"])
 
-# Include API routes
-app.include_router(auth.router, prefix="/api/v1", tags=["auth"])
-app.include_router(dashboard.router, prefix="/api/v1", tags=["dashboard"])
+# Any other initialization, such as database connection, can also go here
