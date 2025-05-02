@@ -1,30 +1,22 @@
-from fastapi import APIRouter, Query, Request
-from app.api.v1.handlers.features_handler import handle_feature_use
+from fastapi import APIRouter, HTTPException, Request, Query
+from app.api.v1.handlers import features_handler
 
 router = APIRouter()
 
-# Define endpoints for each feature
+@router.get("/features/{feature_name}")
+async def use_feature(feature_name: str, user_id: str = Query(...), request: Request = None):
+    ip_address = request.client.host if request else "unknown"
+    user_agent = request.headers.get("user-agent") if request else "unknown"
 
-@router.get("/features/speech_to_text")
-async def use_speech_to_text(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "speech_to_text", request)
+    result, error = features_handler.handle_feature_use(user_id, feature_name, ip_address, user_agent)
+    if error:
+        if error == "Feature not found.":
+            raise HTTPException(status_code=404, detail=error)
+        elif error == "User wallet not found.":
+            raise HTTPException(status_code=404, detail=error)
+        elif error == "Insufficient credits.":
+            raise HTTPException(status_code=402, detail=error)
+        else:
+            raise HTTPException(status_code=400, detail=error)
 
-@router.get("/features/text_to_speech")
-async def use_text_to_speech(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "text_to_speech", request)
-
-@router.get("/features/summarize")
-async def use_summarize(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "summarize", request)
-
-@router.get("/features/diarization")
-async def use_diarization(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "diarization", request)
-
-@router.get("/features/call_bot")
-async def use_call_bot(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "call_bot", request)
-
-@router.get("/features/chatbot")
-async def use_chatbot(user_id: str = Query(...), request: Request = None):
-    return await handle_feature_use(user_id, "chatbot", request)
+    return result
