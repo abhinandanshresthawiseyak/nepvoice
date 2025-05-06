@@ -1,7 +1,16 @@
-from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func
+from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
+
+# class User(Base):
+#     __tablename__ = "users"
+#     id = Column(String, primary_key=True, index=True)
+#     email = Column(String, unique=True, index=True)
+#     name = Column(String)
+#     picture = Column(String)
+#     created_at = Column(DateTime(timezone=True), server_default=func.now())
+#     last_login_at = Column(DateTime(timezone=True))
 
 class User(Base):
     __tablename__ = "users"
@@ -9,6 +18,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     name = Column(String)
     picture = Column(String)
+    role_level = Column(Integer, nullable=False, default=1)  # <-- NEW!
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login_at = Column(DateTime(timezone=True))
 
@@ -58,3 +68,18 @@ class CreditUsage(Base):
     feature_id = Column(Integer, ForeignKey("features.id", ondelete="SET NULL"))
     credits_used = Column(Integer, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+
+
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    role_id = Column(Integer, primary_key=True, autoincrement=True)
+    role_name = Column(Text, unique=True, nullable=False)
+    role_level = Column(Integer, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint('role_level > 0', name='check_role_level_positive'),
+    )

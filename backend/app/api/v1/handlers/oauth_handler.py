@@ -135,11 +135,20 @@ async def handle_callback(code):
             return name, "existing"
 
         # Create new user
+        # new_user = User(
+        #     id=user_id,
+        #     email=email,
+        #     name=name,
+        #     picture=picture,
+        #     last_login_at=func.now()
+        # )
+
         new_user = User(
             id=user_id,
             email=email,
             name=name,
             picture=picture,
+            role_level=1,  # <-- assign default role
             last_login_at=func.now()
         )
         db.add(new_user)
