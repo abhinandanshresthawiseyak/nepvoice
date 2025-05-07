@@ -1,6 +1,20 @@
 version: '3.7'
 
 services:
+  nepvoice-database:
+    image: ankane/pgvector:latest 
+    environment:
+      POSTGRES_USER: nepvoice
+      POSTGRES_PASSWORD: nepvoice
+      POSTGRES_DB: nepvoice
+    ports:
+      - "9090:5432"
+    networks:
+      - app-network
+    restart: always
+    volumes:
+      - ./nepvoice-db:/var/lib/postgresql/data
+
   nepvoice-backend:
     build: 
       context: ./backend
@@ -9,27 +23,15 @@ services:
       - "5678:5678"
     depends_on:
       - nepvoice-database
-    environment:
-      - DATABASE_URL=postgresql://nepvoice:nepvoice@nepvoice-database/nepvoice
-      - CLIENT_ID=your-client-id
-      - CLIENT_SECRET=your-client-secret
-      - REDIRECT_URI=your-redirect-uri
-      - AUTH_URI=your-auth-uri
-      - TOKEN_URI=your-token-uri
-      - USERINFO_URI=your-userinfo-uri
     volumes:
-      - .:/app
-    networks:
-      - app-network
+      - ./backend:/backend
+      - ./files:/files
 
-  nepvoice-database:
-    image: postgres:latest  # This will pull the latest version of PostgreSQL
-    environment:
-      POSTGRES_USER: nepvoice
-      POSTGRES_PASSWORD: nepvoice
-      POSTGRES_DB: nepvoice
     networks:
       - app-network
+    restart: always
+
+  
 
 networks:
   app-network:
