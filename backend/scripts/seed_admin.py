@@ -21,6 +21,7 @@ def seed_admin_user():
             db.add(new_admin)
             db.commit()
             print("✅ Admin user 'admin_saugat' added successfully.")
+            
         else:
             print("⚠️ Admin user already exists.")
     finally:

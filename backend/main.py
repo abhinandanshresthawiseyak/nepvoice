@@ -60,7 +60,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from app.database.database import init_db
-from app.api.v1.endpoints import oauth, credit, features
+from app.api.v1.endpoints import oauth, credit, features, admin
 
 app = FastAPI()
 
@@ -76,3 +76,4 @@ async def root():
 app.include_router(oauth.router, prefix="/auth")
 app.include_router(credit.router, prefix="/credits")
 app.include_router(features.router, prefix="")
+app.include_router(admin.router, prefix="")
