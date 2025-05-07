@@ -2,15 +2,18 @@ version: '3.7'
 
 services:
   nepvoice-database:
-      image: ankane/pgvector:latest 
-      environment:
-        POSTGRES_USER: nepvoice
-        POSTGRES_PASSWORD: nepvoice
-        POSTGRES_DB: nepvoice
-      ports:
-        - "9090:5432"
-      networks:
-        - app-network
+    image: ankane/pgvector:latest 
+    environment:
+      POSTGRES_USER: nepvoice
+      POSTGRES_PASSWORD: nepvoice
+      POSTGRES_DB: nepvoice
+    ports:
+      - "9090:5432"
+    networks:
+      - app-network
+    restart: always
+    volumes:
+      - ./nepvoice-db:/var/lib/postgresql/data
 
   nepvoice-backend:
     build: 
@@ -21,9 +24,12 @@ services:
     depends_on:
       - nepvoice-database
     volumes:
-      - ./:/app
+      - ./backend:/backend
+      - ./files:/files
+
     networks:
       - app-network
+    restart: always
 
   
 

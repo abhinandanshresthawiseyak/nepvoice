@@ -59,16 +59,25 @@
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from app.database.database import init_db, create_vector_extension, create_vector_schema
-from app.api.v1.endpoints import oauth, credit, features, admin
+from app.database.database import init_db
+from app.api.v1.endpoints import oauth, credit, features, admin, chatbot
+from app.core.config import SECRET_KEY
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 
 app = FastAPI()
+
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"],
+                   allow_credentials=True,
+                   allow_methods=["*"],
+                   allow_headers=["*"])
+
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 @app.on_event("startup")
 def startup_event():
     init_db()
-    create_vector_extension()
-    create_vector_schema()
 
 @app.get("/")
 async def root():
@@ -79,3 +88,4 @@ app.include_router(oauth.router, prefix="/auth")
 app.include_router(credit.router, prefix="/credits")
 app.include_router(features.router, prefix="")
 app.include_router(admin.router, prefix="")
+app.include_router(chatbot.router, prefix="/chatbot")

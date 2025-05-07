@@ -6,3 +6,10 @@ databases
 python-dotenv
 pytz
 psycopg2-binary
+itsdangerous
+python-multipart
+pandas
+langchain
+langchain_google_genai
+pymupdf
+pgvector
