@@ -1,36 +1,38 @@
-# app/api/v1/handlers/credit_handler.py
-
-from database.database import database, user_credits, credit_purchases
-from sqlalchemy import select, update, insert
-from datetime import datetime
 import random
 import string
-from fastapi import HTTPException
+from datetime import datetime
+from sqlalchemy.orm import Session
+from sqlalchemy import func
+from app.database.database import SessionLocal
+from app.models.models import UserCredit, CreditPurchase
 
 def generate_fake_reference():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
-async def simulate_credit_purchase(user_id: str, credit_amount: int):
-    result = await database.fetch_one(select(user_credits).where(user_credits.c.user_id == user_id))
-    if not result:
-        raise HTTPException(status_code=404, detail="User not found or has no wallet.")
 
-    new_balance = result["credits_balance"] + credit_amount
+def simulate_purchase(user_id: str, credit_amount: int):
+    db: Session = SessionLocal()
+    try:
+        user_credit = db.query(UserCredit).filter(UserCredit.user_id == user_id).first()
+        if not user_credit:
+            return None, "User not found or has no wallet."
 
-    await database.execute(update(user_credits)
-        .where(user_credits.c.user_id == user_id)
-        .values(credits_balance=new_balance, updated_at=datetime.utcnow())
-    )
+        # Update balance
+        user_credit.credits_balance += credit_amount
+        user_credit.updated_at = func.now()
+        db.commit()
 
-    await database.execute(insert(credit_purchases).values(
-        user_id=user_id,
-        credits_added=credit_amount,
-        payment_provider=random.choice(["paypal", "stripe", "test_gateway"]),
-        payment_reference=generate_fake_reference(),
-        created_at=datetime.utcnow()
-    ))
+        # Insert credit purchase log
+        new_purchase = CreditPurchase(
+            user_id=user_id,
+            credits_added=credit_amount,
+            payment_provider=random.choice(["paypal", "stripe", "test_gateway"]),
+            payment_reference=generate_fake_reference(),
+            created_at=datetime.utcnow()
+        )
+        db.add(new_purchase)
+        db.commit()
 
-    return {
-        "message": f"{credit_amount} credits added to user {user_id}.",
-        "new_balance": new_balance
-    }
+        return user_credit.credits_balance, None
+    finally:
+        db.close()

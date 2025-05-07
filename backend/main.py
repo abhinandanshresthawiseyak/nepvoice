@@ -1,14 +1,79 @@
-from fastapi import FastAPI
-from app.api.v1.endpoints import features  # Import features endpoints
-from app.api.v1.endpoints import credit  # If credit is part of your endpoints
-from app.api.v1.endpoints import oauth  # If oauth is part of your endpoints
+# from app.database.database import init_db
 
-# Initialize FastAPI app
+# def main():
+#     print("Initializing database...")
+#     init_db()
+#     print("Database initialized successfully!")
+
+# if __name__ == "__main__":
+#     main()
+
+
+################################################################################above commented code works for database creation
+
+# from fastapi import FastAPI
+# from fastapi.responses import HTMLResponse
+# from app.database.database import init_db
+# from app.api.v1.endpoints import oauth
+
+# app = FastAPI()
+
+# @app.on_event("startup")
+# def startup_event():
+#     init_db()  # Ensure tables exist on startup
+
+# # ✅ Root-level homepage
+# @app.get("/")
+# async def root():
+#     return HTMLResponse('<a href="/auth/login">Login with Google</a>')
+
+# # ✅ OAuth router under /auth
+# app.include_router(oauth.router, prefix="/auth")
+
+
+#############################above code works for database creation and oauth login
+
+
+# from fastapi import FastAPI
+# from fastapi.responses import HTMLResponse
+# from app.database.database import init_db
+# from app.api.v1.endpoints import oauth, credit
+
+# app = FastAPI()
+
+# @app.on_event("startup")
+# def startup_event():
+#     init_db()
+
+# @app.get("/")
+# async def root():
+#     return HTMLResponse('<a href="/auth/login">Login with Google</a>')
+
+# # Include routers
+# app.include_router(oauth.router, prefix="/auth")
+# app.include_router(credit.router, prefix="/credits")
+
+
+###############################above code works for database creation and oauth login and credit purchase simulation
+
+
+from fastapi import FastAPI
+from fastapi.responses import HTMLResponse
+from app.database.database import init_db
+from app.api.v1.endpoints import oauth, credit, features, admin
+
 app = FastAPI()
 
-# Include the routers for each feature, credit, and oauth
-app.include_router(features.router, prefix="/api/v1", tags=["features"])
-app.include_router(credit.router, prefix="/api/v1", tags=["credit"])
-app.include_router(oauth.router, prefix="/api/v1", tags=["auth"])
+@app.on_event("startup")
+def startup_event():
+    init_db()
 
-# Any other initialization, such as database connection, can also go here
+@app.get("/")
+async def root():
+    return HTMLResponse('<a href="/auth/login">Login with Google</a>')
+
+# Include routers
+app.include_router(oauth.router, prefix="/auth")
+app.include_router(credit.router, prefix="/credits")
+app.include_router(features.router, prefix="")
+app.include_router(admin.router, prefix="")
