@@ -19,10 +19,14 @@ async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depen
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        print(f"File saved to {file_location}")
+        
+        # Process the PDF file
         chunks=get_pdf_chunks_with_metadata_pymupdf(file_location)
         df = add_embeddings(chunks)
         save_to_postgres(df, db)
         
+        print("Data ingested successfully.")
         return {"filename": file.filename, "message": "PDF uploaded successfully, and data ingested."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
