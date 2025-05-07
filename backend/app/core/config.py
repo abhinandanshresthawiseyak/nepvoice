@@ -1,18 +1,14 @@
-import os
-from dotenv import load_dotenv
+POSTGRES_USER = "nepvoice"
+POSTGRES_PASSWORD = "nepvoice"
+POSTGRES_HOST = "nepvoice-database"
+POSTGRES_PORT = 5432
+POSTGRES_DB = "nepvoice"
 
-load_dotenv()  # Load from .env
+DATABASE_URL = "postgresql://postgres:heheboii420@localhost/nepvoice"
 
-POSTGRES_USER = os.getenv("POSTGRES_USER")
-POSTGRES_PASSWORD = os.getenv("POSTGRES_PASSWORD")
-POSTGRES_HOST = os.getenv("POSTGRES_HOST")
-POSTGRES_PORT = os.getenv("POSTGRES_PORT")
-POSTGRES_DB = os.getenv("POSTGRES_DB")
-
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-REDIRECT_URI = os.getenv("REDIRECT_URI")
-
-DATABASE_URL = (
-    f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
-)
+CLIENT_ID = "1039402342826-4dcealkuk6osr3qjdirmmetqkk4n4a1p.apps.googleusercontent.com"
+CLIENT_SECRET = "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"
+REDIRECT_URI = "http://localhost:8000/auth/callback"
+AUTH_URI = "https://accounts.google.com/o/oauth2/auth"
+TOKEN_URI = "https://oauth2.googleapis.com/token"
+USERINFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo"
