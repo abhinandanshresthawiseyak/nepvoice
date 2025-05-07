@@ -27,12 +27,11 @@ async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depen
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
-    
 @router.get("/chat")
 async def chat(query: str, db: Session = Depends(get_db)):
     try:
         # Assuming you have a function to handle the chat logic
         response = handle_chat_logic(query, db)
-        return {"response": response}
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
