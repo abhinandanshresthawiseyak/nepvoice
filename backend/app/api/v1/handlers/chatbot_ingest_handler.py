@@ -1,3 +1,5 @@
+from fastapi import HTTPException
+import shutil
 from typing import List, Dict, Any
 from app.models.models import PDFChunk
 import fitz
@@ -15,6 +17,20 @@ load_dotenv()  # This loads variables from .env into environment
 api_key = os.getenv("gemini_api_key")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=api_key)
 
+def save_pdf_file(file):
+    try:
+        if not file.filename.endswith(".pdf"):
+            raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
+
+        file_location = os.path.join("/files", file.filename)
+
+        with open(file_location, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        return file_location
+    except Exception as e:
+        raise 
+    
 def get_pdf_chunks_with_metadata_pymupdf(pdf_path: str) -> List[Dict[str, Any]]:
     """
     Extracts all text chunks from PDFs using PyMuPDF, along with their PDF name, page number, chunk number, and rectangles (coordinates).
