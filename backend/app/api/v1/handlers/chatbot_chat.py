@@ -1,19 +1,11 @@
-from typing import List, Dict, Any
-from app.models.models import PDFChunk
-import fitz
-import pandas as pd
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from typing import List
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
-import pymupdf  # import package PyMuPDF
-import pandas as pd
-from app.database.database import engine
 from dotenv import load_dotenv
 import os
 from sqlalchemy import  text
 import numpy as np
 from langchain.prompts import PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains import LLMChain
 
 # Load environment variables
 load_dotenv()
@@ -54,7 +46,7 @@ def handle_chat_logic(query, db):
     all_chunks=retrieve_similar_chunks(query=query, db=db)
     print(all_chunks)
     prompt_template = PromptTemplate.from_template("""
-        You are a helpful assistant. Use the context below to answer the question.
+        You are a helpful assistant. Use the context below to answer the question. If you don't know the answer, say "I couldn't find relevant answers to your question".
 
         Context:
         {context}
@@ -73,6 +65,9 @@ def handle_chat_logic(query, db):
         max_retries=2
     )
 
-    chain = LLMChain(llm=llm, prompt=prompt_template)
-    result = chain.run({"context": all_chunks, "question": query})
-    return {"response": result, "chunks": all_chunks}
+    # Use Runnable sequence instead of deprecated LLMChain
+    chain = prompt_template | llm
+
+    result = chain.invoke({"context": all_chunks, "question": query})
+
+    return {"response": result.content.strip(), "chunks": all_chunks}
