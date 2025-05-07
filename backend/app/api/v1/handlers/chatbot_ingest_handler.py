@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import shutil
 from typing import List, Dict, Any
-from app.models.models import PDFChunk
+from app.models.models import PDF, PDFChunk
 import fitz
 import pandas as pd
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -17,7 +17,7 @@ load_dotenv()  # This loads variables from .env into environment
 api_key = os.getenv("gemini_api_key")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=api_key)
 
-def save_pdf_file(file):
+def save_pdf_file(file, db):
     try:
         if not file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
@@ -27,11 +27,17 @@ def save_pdf_file(file):
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        return file_location
+        # Save metadata to the database
+        new_pdf = PDF(pdf_name=file.filename, filepath=file_location)
+        db.add(new_pdf)
+        db.commit()
+        db.refresh(new_pdf)  # Get the generated ID
+        
+        return file_location, new_pdf.id
     except Exception as e:
         raise 
     
-def get_pdf_chunks_with_metadata_pymupdf(pdf_path: str) -> List[Dict[str, Any]]:
+def get_pdf_chunks_with_metadata_pymupdf(pdf_path: str, pdf_id: int) -> List[Dict[str, Any]]:
     """
     Extracts all text chunks from PDFs using PyMuPDF, along with their PDF name, page number, chunk number, and rectangles (coordinates).
     """
@@ -54,7 +60,7 @@ def get_pdf_chunks_with_metadata_pymupdf(pdf_path: str) -> List[Dict[str, Any]]:
                 all_chunks.append({
                     "chunk": chunk,
                     # "rects": rects,
-                    "pdf_name": pdf_name,
+                    "pdf_id": pdf_id,
                     "page_number": page_number,
                     "chunk_number": chunk_number
                 })
@@ -73,7 +79,7 @@ def save_to_postgres(df, db):
         for _, row in df.iterrows():
             chunk = PDFChunk(
                 chunk=row['chunk'],
-                pdf_name=row['pdf_name'],
+                pdf_id=row['pdf_id'],
                 page_number=int(row['page_number']),
                 chunk_number=int(row['chunk_number']),
                 embedding=row['embedding']  # Should be a list or NumPy array of floats

@@ -30,7 +30,7 @@ def retrieve_similar_chunks(query: str, db, top_k: int = 5) -> List[dict]:
     query_embedding = get_query_embedding(query)
 
     sql = text("""
-        SELECT chunk, pdf_name, page_number, chunk_number
+        SELECT chunk, pdf_id, page_number, chunk_number
         FROM vector.pdf_chunks
         ORDER BY embedding <#> (:embedding)::vector
         LIMIT :top_k;
@@ -40,7 +40,7 @@ def retrieve_similar_chunks(query: str, db, top_k: int = 5) -> List[dict]:
         "top_k": top_k
     }).fetchall()
 
-    return [{"chunk": row[0], "pdf_name": row[1],"page_number":row[2],"chunk_number":row[3]} for row in result]
+    return [{"chunk": row[0], "pdf_id": row[1],"page_number":row[2],"chunk_number":row[3]} for row in result]
 
 def handle_chat_logic(query, db):
     all_chunks=retrieve_similar_chunks(query=query, db=db)

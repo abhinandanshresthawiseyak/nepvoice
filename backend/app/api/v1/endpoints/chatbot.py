@@ -3,20 +3,22 @@ import shutil
 from requests import Session
 from app.database.database import get_db
 from app.api.v1.handlers.chatbot_chat import handle_chat_logic
+from app.models.models import PDF
 from fastapi import APIRouter, File, HTTPException, UploadFile, Depends
 from app.api.v1.handlers.chatbot_ingest_handler import get_pdf_chunks_with_metadata_pymupdf, add_embeddings, save_to_postgres, save_pdf_file
+from fastapi.responses import FileResponse
 
 router = APIRouter()
 
-@router.post("/upload_pdf_to_ingest")
+@router.post("/pdf", description="This endpoint allows you to upload a PDF file, extract its contents, generate embeddings, and store them in the database.")
 async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depends(get_db)):
     try:
-        file_location=save_pdf_file(file)
+        file_location, pdf_id=save_pdf_file(file, db)
         
-        if file_location:
-            print(f"File saved to {file_location}")
+        if file_location and pdf_id:
+            print(f"File saved to {file_location} with pdf_id as {pdf_id}")
             # Process the PDF file
-            chunks=get_pdf_chunks_with_metadata_pymupdf(file_location)
+            chunks=get_pdf_chunks_with_metadata_pymupdf(file_location, pdf_id=pdf_id)
             df = add_embeddings(chunks)
             save_to_postgres(df, db)
             
@@ -25,7 +27,7 @@ async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depen
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
-@router.get("/chat")
+@router.get("/chat", description="This endpoint allows you to chat with the pdf you ingested")
 async def chat(query: str, db: Session = Depends(get_db)):
     try:
         # Assuming you have a function to handle the chat logic
@@ -33,3 +35,20 @@ async def chat(query: str, db: Session = Depends(get_db)):
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    
+@router.get("/pdf", description="This endpoint allows you to get a PDF file")
+async def get_pdf(pdf_id: int, db: Session = Depends(get_db)):
+    # Fetch PDF record by ID
+    pdf_record = db.query(PDF).filter(PDF.id == pdf_id).first()
+
+    if not pdf_record:
+        raise HTTPException(status_code=404, detail="PDF not found.")
+
+    file_path = pdf_record.filepath
+
+    # Validate file exists on disk
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found on server.")
+
+    # Return the file as a response
+    return FileResponse(path=file_path, filename=pdf_record.pdf_name, media_type='application/pdf')

@@ -4,13 +4,22 @@ from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
 
+
+class PDF(Base):
+    __tablename__ = 'pdf'
+    __table_args__ = {'schema': 'vector'}
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    pdf_name = Column(String, nullable=False)
+    filepath = Column(String, nullable=False)
+    
 class PDFChunk(Base):
     __tablename__ = 'pdf_chunks'
     __table_args__ = {'schema': 'vector'}
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     chunk = Column(String, nullable=False)
-    pdf_name = Column(String, nullable=False)
+    pdf_id = Column(Integer, nullable=False)
     page_number = Column(Integer, nullable=False)
     chunk_number = Column(Integer, nullable=False)
     embedding = Column(Vector(768), nullable=False)
