@@ -59,7 +59,7 @@
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
-from app.database.database import init_db
+from app.database.database import init_db, create_vector_extension, create_vector_schema
 from app.api.v1.endpoints import oauth, credit, features, admin
 
 app = FastAPI()
@@ -67,6 +67,8 @@ app = FastAPI()
 @app.on_event("startup")
 def startup_event():
     init_db()
+    create_vector_extension()
+    create_vector_schema()
 
 @app.get("/")
 async def root():
