@@ -17,7 +17,7 @@ from langchain.chains import LLMChain
 
 # Load environment variables
 load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
+api_key = os.getenv("gemini_api_key")
 os.environ["GOOGLE_API_KEY"] = api_key
 
 # Initialize the embedding model
