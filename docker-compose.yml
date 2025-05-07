@@ -23,11 +23,13 @@ services:
       - app-network
 
   nepvoice-database:
-    image: postgres:latest  # This will pull the latest version of PostgreSQL
+    image: ankane/pgvector:latest 
     environment:
       POSTGRES_USER: nepvoice
       POSTGRES_PASSWORD: nepvoice
       POSTGRES_DB: nepvoice
+    ports:
+      - "9090:5432"
     networks:
       - app-network
 
