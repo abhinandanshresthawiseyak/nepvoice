@@ -1,7 +1,19 @@
 from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
+from pgvector.sqlalchemy import Vector
 
 Base = declarative_base()
+
+class PDFChunk(Base):
+    __tablename__ = 'pdf_chunks'
+    __table_args__ = {'schema': 'vector'}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    chunk = Column(String, nullable=False)
+    pdf_name = Column(String, nullable=False)
+    page_number = Column(Integer, nullable=False)
+    chunk_number = Column(Integer, nullable=False)
+    embedding = Column(Vector(768), nullable=False)
 
 # class User(Base):
 #     __tablename__ = "users"
