@@ -17,7 +17,7 @@ load_dotenv()  # This loads variables from .env into environment
 api_key = os.getenv("gemini_api_key")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=api_key)
 
-def save_pdf_file(file, db):
+def save_pdf_file(file, db, user_id):
     try:
         if not file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
@@ -28,7 +28,7 @@ def save_pdf_file(file, db):
             shutil.copyfileobj(file.file, buffer)
 
         # Save metadata to the database
-        new_pdf = PDF(pdf_name=file.filename, filepath=file_location)
+        new_pdf = PDF(pdf_name=file.filename, filepath=file_location, uploaded_by_user_id=user_id)
         db.add(new_pdf)
         db.commit()
         db.refresh(new_pdf)  # Get the generated ID
@@ -74,7 +74,7 @@ def add_embeddings(chunks):
     df['embedding'] = embeddings_list
     return df
 
-def save_to_postgres(df, db):
+def save_to_postgres(df, db, user_id):
     try:
         for _, row in df.iterrows():
             chunk = PDFChunk(
@@ -82,7 +82,8 @@ def save_to_postgres(df, db):
                 pdf_id=row['pdf_id'],
                 page_number=int(row['page_number']),
                 chunk_number=int(row['chunk_number']),
-                embedding=row['embedding']  # Should be a list or NumPy array of floats
+                embedding=row['embedding'],
+                uploaded_by_user_id=user_id
             )
             db.add(chunk)
         db.commit()

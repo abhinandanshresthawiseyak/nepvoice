@@ -60,10 +60,11 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from app.database.database import init_db
-from app.api.v1.endpoints import oauth, credit, features, admin, chatbot
+from app.api.v1.endpoints import oauth, credit, features, admin
 from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from app.api.v1.endpoints.feature import chatbot, callbot
 
 app = FastAPI()
 
@@ -88,4 +89,5 @@ app.include_router(oauth.router, prefix="/auth")
 app.include_router(credit.router, prefix="/credits")
 app.include_router(features.router, prefix="")
 app.include_router(admin.router, prefix="")
-app.include_router(chatbot.router, prefix="/chatbot")
+app.include_router(chatbot.router, prefix="/feature/chatbot")
+app.include_router(callbot.router, prefix="/feature/callbot")
