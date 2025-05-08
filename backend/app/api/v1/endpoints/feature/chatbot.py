@@ -12,9 +12,11 @@ from app.dependencies.current_user import get_current_user
 router = APIRouter()
 
 @router.post("/pdf", description="This endpoint allows you to upload a PDF file, extract its contents, generate embeddings, and store them in the database.")
-async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+# async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depends(get_db)):
     try:
-        user_id=current_user.id
+        # user_id=current_user.id
+        user_id='fastapi'
         
         file_location, pdf_id=save_pdf_file(file, db, user_id=user_id)
         
@@ -32,9 +34,11 @@ async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depen
     
     
 @router.get("/chat", description="This endpoint allows you to chat with the pdf you ingested")
-async def chat(query: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+# async def chat(query: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def chat(query: str, db: Session = Depends(get_db)):
     try:
-        user_id=current_user.id
+        # user_id=current_user.id
+        user_id='fastapi'
         
         # Assuming you have a function to handle the chat logic
         response = handle_chat_logic(query=query, db=db, user_id=user_id)
@@ -45,9 +49,12 @@ async def chat(query: str, db: Session = Depends(get_db), current_user: User = D
     
     
 @router.get("/pdf", description="This endpoint allows you to get a PDF file")
-async def get_pdf(pdf_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+# async def get_pdf(pdf_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_pdf(pdf_id: int, db: Session = Depends(get_db)):
     try:
-        user_id=current_user.id
+        # user_id=current_user.id
+        user_id='fastapi'
+        
         # Fetch PDF record by ID
         pdf_record = db.query(PDF).filter(PDF.id == pdf_id, PDF.uploaded_by_user_id==user_id).first()
 

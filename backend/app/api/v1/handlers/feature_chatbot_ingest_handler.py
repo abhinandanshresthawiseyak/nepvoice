@@ -11,6 +11,7 @@ import pandas as pd
 from app.database.database import engine
 from dotenv import load_dotenv
 import os
+from datetime import datetime
 
 load_dotenv()  # This loads variables from .env into environment
 
@@ -27,8 +28,12 @@ def save_pdf_file(file, db, user_id):
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        # Read total number of pages using fitz (PyMuPDF)
+        with fitz.open(file_location) as pdf:
+            total_pages = pdf.page_count
+        
         # Save metadata to the database
-        new_pdf = PDF(pdf_name=file.filename, filepath=file_location, uploaded_by_user_id=user_id)
+        new_pdf = PDF(pdf_name=file.filename, filepath=file_location, uploaded_by_user_id=user_id, total_pages=total_pages,uploaded_on_utc=datetime.now())
         db.add(new_pdf)
         db.commit()
         db.refresh(new_pdf)  # Get the generated ID
@@ -83,7 +88,8 @@ def save_to_postgres(df, db, user_id):
                 page_number=int(row['page_number']),
                 chunk_number=int(row['chunk_number']),
                 embedding=row['embedding'],
-                uploaded_by_user_id=user_id
+                uploaded_by_user_id=user_id,
+                created_on_utc=datetime.now()
             )
             db.add(chunk)
         db.commit()
