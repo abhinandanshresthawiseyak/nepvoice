@@ -33,13 +33,14 @@ def retrieve_similar_chunks(query: str, db, user_id, top_k: int = 5) -> List[dic
         SELECT a.chunk, a.pdf_id, a.page_number, a.chunk_number, b.total_pages
         FROM vector.pdf_chunks a
         INNER JOIN vector.pdf b on a.pdf_id=b.id
-        WHERE a.uploaded_by_user_id='{user_id}'
+        WHERE a.uploaded_by_user_id=:user_id
         ORDER BY a.embedding <#> (:embedding)::vector
         LIMIT :top_k;
     """)
     result = db.execute(sql, {
         "embedding": query_embedding.tolist(),
-        "top_k": top_k
+        "top_k": top_k,
+        "user_id":user_id
     }).fetchall()
 
     return [{"chunk": row[0], "pdf_id": row[1],"page_number":row[2],"chunk_number":row[3],"total_pages":row[4]} for row in result]
