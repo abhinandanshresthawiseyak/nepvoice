@@ -26,12 +26,13 @@ def get_query_embedding(query: str):
     embedding = embeddings.embed_query(query)
     return np.array(embedding, dtype=np.float32)  # ensure it's a NumPy array
 
-def retrieve_similar_chunks(query: str, db, top_k: int = 5) -> List[dict]:
+def retrieve_similar_chunks(query: str, db, user_id, top_k: int = 5) -> List[dict]:
     query_embedding = get_query_embedding(query)
 
-    sql = text("""
+    sql = text(f"""
         SELECT chunk, pdf_id, page_number, chunk_number
         FROM vector.pdf_chunks
+        WHERE uploaded_by_user_id={user_id}
         ORDER BY embedding <#> (:embedding)::vector
         LIMIT :top_k;
     """)
@@ -42,8 +43,8 @@ def retrieve_similar_chunks(query: str, db, top_k: int = 5) -> List[dict]:
 
     return [{"chunk": row[0], "pdf_id": row[1],"page_number":row[2],"chunk_number":row[3]} for row in result]
 
-def handle_chat_logic(query, db):
-    all_chunks=retrieve_similar_chunks(query=query, db=db)
+def handle_chat_logic(query, db, user_id):
+    all_chunks=retrieve_similar_chunks(query=query, db=db, user_id=user_id)
     print(all_chunks)
     prompt_template = PromptTemplate.from_template("""
         You are a helpful assistant. Use the context below to answer the question. If you don't know the answer, say "I couldn't find relevant answers to your question".

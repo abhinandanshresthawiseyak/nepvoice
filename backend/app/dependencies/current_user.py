@@ -1,13 +1,13 @@
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.models.user import User
+from app.models.models import User
 from app.database.database import get_db
 from starlette.requests import Request
 from app.utils.error_messages import user_not_found, unauthorized_access, unauthenticated
 
 
 def get_current_user(request: Request, db: Session = Depends(get_db)):
-    user_email = 'user@global.com'
+    user_email = request.session.get('email') 
     
     if not user_email:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=unauthenticated())

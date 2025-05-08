@@ -12,6 +12,7 @@ class PDF(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     pdf_name = Column(String, nullable=False)
     filepath = Column(String, nullable=False)
+    uploaded_by_user_id = Column(String, index=True)
     
 class PDFChunk(Base):
     __tablename__ = 'pdf_chunks'
@@ -23,7 +24,8 @@ class PDFChunk(Base):
     page_number = Column(Integer, nullable=False)
     chunk_number = Column(Integer, nullable=False)
     embedding = Column(Vector(768), nullable=False)
-
+    uploaded_by_user_id = Column(String, index=True)
+    
 # class User(Base):
 #     __tablename__ = "users"
 #     id = Column(String, primary_key=True, index=True)
