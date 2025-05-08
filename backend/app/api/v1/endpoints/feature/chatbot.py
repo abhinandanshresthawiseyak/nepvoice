@@ -5,7 +5,7 @@ from app.database.database import get_db
 from app.api.v1.handlers.feature_chatbot_chat import handle_chat_logic
 from app.models.models import PDF, User
 from fastapi import APIRouter, File, HTTPException, UploadFile, Depends
-from app.api.v1.handlers.feature_chatbot_pdf_ingestion import get_pdf_chunks_with_metadata_pymupdf, add_embeddings, save_to_postgres, save_pdf_file
+from app.api.v1.handlers.feature_chatbot_ingest_handler import get_pdf_chunks_with_metadata_pymupdf, add_embeddings, save_to_postgres, save_pdf_file
 from fastapi.responses import FileResponse
 from app.dependencies.current_user import get_current_user
 
