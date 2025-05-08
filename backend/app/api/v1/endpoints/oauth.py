@@ -67,7 +67,7 @@ async def auth_callback(request: Request):
         return HTMLResponse("Failed to get access token.", status_code=400)
 
     # ✅ Always redirect after login (whether new or existing user)
-    redirect_url = "https://beba-113-199-192-49.ngrok-free.app/app"
+    redirect_url = "https://nepvoice.wiseyak.com/app"  # Replace with your actual redirect URL
 
     return RedirectResponse(url=redirect_url)
 

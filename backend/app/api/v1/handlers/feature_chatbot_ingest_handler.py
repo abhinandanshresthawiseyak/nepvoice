@@ -22,7 +22,7 @@ def save_pdf_file(file, db, user_id):
         if not file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
 
-        file_location = os.path.join("/files", file.filename)
+        file_location = os.path.join("D:\\saugat_branch\\nepvoice\\files", file.filename)
 
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
