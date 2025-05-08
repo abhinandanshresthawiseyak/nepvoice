@@ -75,9 +75,10 @@ from urllib.parse import urlencode
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.database.database import SessionLocal
-from app.models.models import User, UserCredit
+from app.models.models import User, UserCredit, UserActivityLog
 
 from app.core import config
+import random
 
 CLIENT_ID = config.CLIENT_ID
 CLIENT_SECRET = config.CLIENT_SECRET
@@ -97,6 +98,83 @@ def get_login_url():
         "prompt": "consent"
     }
     return f"{AUTH_URI}?{urlencode(params)}"
+
+
+
+
+
+def generate_ssid():
+    return random.randint(100000, 999999)
+
+
+
+
+# async def handle_callback(code):
+#     # Exchange authorization code for access token
+#     data = {
+#         "code": code,
+#         "client_id": CLIENT_ID,
+#         "client_secret": CLIENT_SECRET,
+#         "redirect_uri": REDIRECT_URI,
+#         "grant_type": "authorization_code"
+#     }
+
+#     async with httpx.AsyncClient() as client:
+#         token_resp = await client.post(TOKEN_URI, data=data)
+#         token_data = token_resp.json()
+
+#         if "access_token" not in token_data:
+#             return None, "Failed to get access token."
+
+#         headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+#         userinfo_resp = await client.get(USERINFO_URI, headers=headers)
+#         user_info = userinfo_resp.json()
+
+#     user_id = user_info.get("id")
+#     email = user_info.get("email")
+#     name = user_info.get("name")
+#     picture = user_info.get("picture")
+
+#     db: Session = SessionLocal()
+#     try:
+#         existing_user = db.query(User).filter(User.id == user_id).first()
+
+#         if existing_user:
+#             existing_user.last_login_at = func.now()
+#             db.commit()
+#             return name, "existing"
+
+#         # Create new user
+#         # new_user = User(
+#         #     id=user_id,
+#         #     email=email,
+#         #     name=name,
+#         #     picture=picture,
+#         #     last_login_at=func.now()
+#         # )
+
+#         new_user = User(
+#             id=user_id,
+#             email=email,
+#             name=name,
+#             picture=picture,
+#             role_level=1,  # <-- assign default role
+#             last_login_at=func.now()
+#         )
+#         db.add(new_user)
+#         db.commit()
+
+#         # Create credit wallet
+#         new_credit = UserCredit(
+#             user_id=user_id,
+#             credits_balance=0
+#         )
+#         db.add(new_credit)
+#         db.commit()
+
+#         return name, "new"
+#     finally:
+#         db.close()
 
 
 async def handle_callback(code):
@@ -127,41 +205,45 @@ async def handle_callback(code):
 
     db: Session = SessionLocal()
     try:
+        # Check if user exists
         existing_user = db.query(User).filter(User.id == user_id).first()
-
         if existing_user:
             existing_user.last_login_at = func.now()
             db.commit()
-            return name, "existing"
+            user = existing_user
+        else:
+            # Create new user
+            user = User(
+                id=user_id,
+                email=email,
+                name=name,
+                picture=picture,
+                role_level=1,
+                last_login_at=func.now()
+            )
+            db.add(user)
+            db.commit()
 
-        # Create new user
-        # new_user = User(
-        #     id=user_id,
-        #     email=email,
-        #     name=name,
-        #     picture=picture,
-        #     last_login_at=func.now()
-        # )
+            # ✅ Create credit wallet (important!)
+            new_credit = UserCredit(
+                user_id=user_id,
+                credits_balance=0
+            )
+            db.add(new_credit)
+            db.commit()
 
-        new_user = User(
-            id=user_id,
-            email=email,
-            name=name,
-            picture=picture,
-            role_level=1,  # <-- assign default role
-            last_login_at=func.now()
-        )
-        db.add(new_user)
-        db.commit()
-
-        # Create credit wallet
-        new_credit = UserCredit(
+        # Create login session
+        ssid = generate_ssid()
+        activity_log = UserActivityLog(
             user_id=user_id,
-            credits_balance=0
+            activity_type="login",
+            ssid=ssid,
+            logged_in=func.now(),
+            ip_address="",  # you can pass this from request
+            user_agent=""   # you can pass this from request
         )
-        db.add(new_credit)
+        db.add(activity_log)
         db.commit()
-
-        return name, "new"
+        return user.name, ssid, "existing" if existing_user else "new"
     finally:
         db.close()
