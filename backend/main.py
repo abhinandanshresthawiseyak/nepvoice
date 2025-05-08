@@ -62,7 +62,6 @@ from fastapi.responses import HTMLResponse
 from app.database.database import init_db
 from app.api.v1.endpoints import oauth, credit, features, admin
 from fastapi.middleware.cors import CORSMiddleware
-<<<<<<< HEAD
 from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -77,19 +76,6 @@ app.add_middleware(CORSMiddleware,
                    allow_headers=["*"])
 
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
-=======
-app = FastAPI()
-
-# Enable CORS so React can talk to FastAPI
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # React dev server
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
->>>>>>> ce79d2ddd3f8066555e5a78e0bdb97148f10c909
 
 @app.on_event("startup")
 def startup_event():
