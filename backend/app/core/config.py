@@ -12,3 +12,5 @@ REDIRECT_URI = "http://localhost:8000/auth/callback"
 AUTH_URI = "https://accounts.google.com/o/oauth2/auth"
 TOKEN_URI = "https://oauth2.googleapis.com/token"
 USERINFO_URI = "https://www.googleapis.com/oauth2/v2/userinfo"
+
+# REDIRECT_URI = "https://aa90-113-199-192-49.ngrok-free.app/auth/callback"

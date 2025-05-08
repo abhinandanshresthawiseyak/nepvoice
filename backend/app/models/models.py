@@ -49,6 +49,17 @@ class Feature(Base):
     credit_cost = Column(Integer, default=0)
 
 
+# class UserActivityLog(Base):
+#     __tablename__ = "user_activity_logs"
+#     id = Column(Integer, primary_key=True, autoincrement=True)
+#     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
+#     activity_type = Column(String, nullable=False)
+#     feature_id = Column(Integer, ForeignKey("features.id", ondelete="SET NULL"), nullable=True)
+#     details = Column(Text)
+#     ip_address = Column(String)
+#     user_agent = Column(Text)
+#     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 class UserActivityLog(Base):
     __tablename__ = "user_activity_logs"
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -58,7 +69,11 @@ class UserActivityLog(Base):
     details = Column(Text)
     ip_address = Column(String)
     user_agent = Column(Text)
+    ssid = Column(Integer)  # NEW: session id
+    logged_in = Column(DateTime(timezone=True))  # NEW: login time
+    logged_out = Column(DateTime(timezone=True))  # NEW: logout time
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
 
 class CreditUsage(Base):
