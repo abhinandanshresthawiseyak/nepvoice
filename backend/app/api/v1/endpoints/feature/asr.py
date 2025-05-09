@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 
 from app.core.enums import ASRLangEnum
+from app.api.v1.handlers.feature_asr_handler import send_audio_file
 
 # Load environment variables
 load_dotenv()
@@ -18,8 +19,6 @@ router = APIRouter()
 ASR_FILE_LOCATION = os.getenv("ASR_FILE_LOCATION")
 ASR_ENGLISH = os.getenv('ASR_ENGLISH')
 ASR_NEPALI = os.getenv('ASR_NEPALI')
-
-
 
 @router.post("/", summary="This endpoint accepts audio and get the transcript")
 # async def speak_audio(request: Request, lang:str, audio_file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
