@@ -1,5 +1,7 @@
 from enum import Enum
 
-class ASRLangEnum(str, Enum):
+class LangEnum(str, Enum):
     english = "english"
     nepali = "nepali"
+    
+    
