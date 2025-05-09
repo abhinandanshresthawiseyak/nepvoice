@@ -43,7 +43,7 @@ async def call(request: CallRequest, db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs", summary="Gives you the summary of all call logs")
+@router.get("/logs", summary="Gives you the summary of all call logs")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(db: Session = Depends(get_db)):
     try:
@@ -60,7 +60,7 @@ async def call_logs(db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs/{caller_id}", summary="This endpoint allows you to get the details of conversation between user and agent")
+@router.get("/logs/{caller_id}", summary="This endpoint allows you to get the details of conversation between user and agent")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(caller_id, db: Session = Depends(get_db)):
     try:
@@ -77,7 +77,7 @@ async def call_logs(caller_id, db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs/{caller_id}/details", summary="This endpoint allows you to get the details of raw logs stored in the database table")
+@router.get("/logs/{caller_id}/details", summary="This endpoint allows you to get the details of raw logs stored in the database table")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(caller_id, db: Session = Depends(get_db)):
     try:
