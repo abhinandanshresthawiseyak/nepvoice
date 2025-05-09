@@ -14,7 +14,7 @@ load_dotenv()
 
 router = APIRouter()
 
-EXTERNAL_API_URL = 'https://agent.wiseyak.com'
+CALLBOT_URI = os.getenv("CALLBOT_URI")
 username=os.getenv("callbot_username")
 password=os.getenv("callbot_password")
 
@@ -35,7 +35,7 @@ async def call(request: CallRequest, db: Session = Depends(get_db)):
         }
 
         # Make the POST request to the external API
-        response = requests.post(EXTERNAL_API_URL+'/schedule_call', headers=headers, data=data, auth=HTTPBasicAuth(username, password))
+        response = requests.post(CALLBOT_URI+'/schedule_call', headers=headers, data=data, auth=HTTPBasicAuth(username, password))
 
         # Assuming the response is JSON and you want to return this response
         return response.json()  # or adjust based on response format
@@ -52,7 +52,7 @@ async def call_logs(db: Session = Depends(get_db)):
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         # Make the POST request to the external API
-        response = requests.get(EXTERNAL_API_URL+'/call_logs', headers=headers, auth=HTTPBasicAuth(username, password))
+        response = requests.get(CALLBOT_URI+'/call_logs', headers=headers, auth=HTTPBasicAuth(username, password))
 
         # Assuming the response is JSON and you want to return this response
         return response.json()  # or adjust based on response format
@@ -69,7 +69,7 @@ async def call_logs(caller_id, db: Session = Depends(get_db)):
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         # Make the POST request to the external API
-        response = requests.get(EXTERNAL_API_URL+'/call_logs/'+caller_id, params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
+        response = requests.get(CALLBOT_URI+'/call_logs/'+caller_id, params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
 
         # Assuming the response is JSON and you want to return this response
         return response.json()  # or adjust based on response format
@@ -86,7 +86,7 @@ async def call_logs(caller_id, db: Session = Depends(get_db)):
             'Content-Type': 'application/x-www-form-urlencoded'
         }
         # Make the POST request to the external API
-        response = requests.get(EXTERNAL_API_URL+'/call_logs/'+caller_id+'/details', params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
+        response = requests.get(CALLBOT_URI+'/call_logs/'+caller_id+'/details', params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
 
         # Assuming the response is JSON and you want to return this response
         return response.json()  # or adjust based on response format
