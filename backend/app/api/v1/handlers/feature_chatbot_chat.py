@@ -73,4 +73,31 @@ def handle_chat_logic(query, db, user_id):
 
     result = chain.invoke({"context": all_chunks, "question": query})
 
-    return {"response": result.content.strip(), "chunks": all_chunks}
+    # Prepare the response structure
+    documents = {}
+    for chunk in all_chunks:
+        pdf_id = chunk["pdf_id"]
+        
+        # If pdf_id is not already in the documents, initialize it
+        if pdf_id not in documents:
+            documents[pdf_id] = {
+                "pdf_id": pdf_id,
+                "total_pages": chunk["total_pages"],
+                "chunk": []
+            }
+        
+        # Append the chunk to the appropriate pdf_id
+        documents[pdf_id]["chunk"].append({
+            "chunk_number": chunk['chunk_number'],
+            "chunk": chunk["chunk"],
+            "page_number": chunk["page_number"]
+        })
+
+    # Convert the documents dictionary to a list of documents
+    document_list = list(documents.values())
+
+    # Return the structured response
+    return {
+        "response": result.content.strip(),
+        "documents": document_list
+    }
