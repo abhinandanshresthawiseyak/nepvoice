@@ -18,7 +18,7 @@ EXTERNAL_API_URL = 'https://agent.wiseyak.com'
 username=os.getenv("callbot_username")
 password=os.getenv("callbot_password")
 
-@router.post("/call", description="This endpoint allows you to chat with the pdf you ingested")
+@router.post("/call", summary="This endpoint allows you to chat with the pdf you ingested")
 # async def call(request: CallRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call(request: CallRequest, db: Session = Depends(get_db)):
     try:
@@ -43,7 +43,7 @@ async def call(request: CallRequest, db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs", description="Gives you the summary of all call logs")
+@router.get("/call_logs", summary="Gives you the summary of all call logs")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(db: Session = Depends(get_db)):
     try:
@@ -60,7 +60,7 @@ async def call_logs(db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs/{caller_id}", description="This endpoint allows you to get the details of conversation between user and agent")
+@router.get("/call_logs/{caller_id}", summary="This endpoint allows you to get the details of conversation between user and agent")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(caller_id, db: Session = Depends(get_db)):
     try:
@@ -77,7 +77,7 @@ async def call_logs(caller_id, db: Session = Depends(get_db)):
         print("Exception found:", e)
         raise
     
-@router.get("/call_logs/{caller_id}/details", description="This endpoint allows you to get the details of raw logs stored in the database table")
+@router.get("/call_logs/{caller_id}/details", summary="This endpoint allows you to get the details of raw logs stored in the database table")
 # async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call_logs(caller_id, db: Session = Depends(get_db)):
     try:

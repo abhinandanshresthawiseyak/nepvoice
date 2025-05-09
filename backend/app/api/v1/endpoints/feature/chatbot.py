@@ -12,7 +12,7 @@ from app.dependencies.current_user import get_current_user
 
 router = APIRouter()
 
-@router.post("/pdf", description="This endpoint allows you to upload a PDF file, extract its contents, generate embeddings, and store them in the database.")
+@router.post("/pdf", summary="This endpoint allows you to upload a PDF file, extract its contents, generate embeddings, and store them in the database.")
 # async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def upload_pdf_to_ingest(files: List[UploadFile], db: Session = Depends(get_db)):
     try:
@@ -35,7 +35,7 @@ async def upload_pdf_to_ingest(files: List[UploadFile], db: Session = Depends(ge
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
-@router.get("/chat", description="This endpoint allows you to chat with the pdf you ingested")
+@router.get("/chat", summary="This endpoint allows you to chat with the pdf you ingested")
 # async def chat(query: str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def chat(query: str, db: Session = Depends(get_db)):
     try:
@@ -50,7 +50,7 @@ async def chat(query: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     
     
-@router.get("/pdf", description="This endpoint allows you to get a PDF file")
+@router.get("/pdf", summary="This endpoint allows you to get a PDF file")
 # async def get_pdf(pdf_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def get_pdf(pdf_id: int, db: Session = Depends(get_db)):
     try:
