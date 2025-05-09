@@ -38,10 +38,11 @@ def retrieve_similar_chunks(query: str, db, user_id, top_k: int = 5) -> List[dic
     """)
     result = db.execute(sql, {
         "embedding": query_embedding.tolist(),
-        "top_k": top_k
+        "top_k": top_k,
+        "user_id":user_id
     }).fetchall()
 
-    return [{"chunk": row[0], "pdf_id": row[1],"page_number":row[2],"chunk_number":row[3]} for row in result]
+    return [{"chunk": row[0], "pdf_id": row[1],"page_number":row[2],"chunk_number":row[3],"total_pages":row[4]} for row in result]
 
 def handle_chat_logic(query, db, user_id):
     all_chunks=retrieve_similar_chunks(query=query, db=db, user_id=user_id)

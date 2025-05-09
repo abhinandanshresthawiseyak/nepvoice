@@ -1,5 +1,6 @@
 import os
 import shutil
+from typing import List
 from requests import Session
 from app.database.database import get_db
 from app.api.v1.handlers.feature_chatbot_chat import handle_chat_logic
@@ -28,8 +29,16 @@ async def upload_pdf_to_ingest(file: UploadFile = File(...), db: Session = Depen
             df = add_embeddings(chunks)
             save_to_postgres(df, db, user_id=user_id)
             
-            print("Data ingested successfully.")
-            return {"filename": file.filename, "message": "PDF uploaded successfully, and data ingested."}
+            if file_location and pdf_id:
+                print(f"File saved to {file_location} with pdf_id as {pdf_id}")
+                # Process the PDF file
+                chunks=get_pdf_chunks_with_metadata_pymupdf(file_location, pdf_id=pdf_id)
+                df = add_embeddings(chunks)
+                save_to_postgres(df, db, user_id=user_id)
+                
+                print("Data ingested successfully.")
+                filenames.append(file_location)
+        return {"files": filenames, "message": "PDFs uploaded successfully, and data ingested."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
     

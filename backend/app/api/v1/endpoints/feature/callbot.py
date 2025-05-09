@@ -14,11 +14,11 @@ load_dotenv()
 
 router = APIRouter()
 
-EXTERNAL_API_URL = 'https://agent.wiseyak.com/schedule_call'
+CALLBOT_URI = os.getenv("CALLBOT_URI")
 username=os.getenv("callbot_username")
 password=os.getenv("callbot_password")
 
-@router.post("/call", description="This endpoint allows you to chat with the pdf you ingested")
+@router.post("/call", summary="This endpoint allows you to chat with the pdf you ingested")
 # async def call(request: CallRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def call(request: CallRequest, db: Session = Depends(get_db)):
     try:
@@ -29,15 +29,64 @@ async def call(request: CallRequest, db: Session = Depends(get_db)):
             'bank': request.bank
         }
         
-        print(data)
-        
         headers = {
             'accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
         }
 
         # Make the POST request to the external API
-        response = requests.post(EXTERNAL_API_URL, headers=headers, data=data, auth=HTTPBasicAuth(username, password))
+        response = requests.post(CALLBOT_URI+'/schedule_call', headers=headers, data=data, auth=HTTPBasicAuth(username, password))
+
+        # Assuming the response is JSON and you want to return this response
+        return response.json()  # or adjust based on response format
+    except Exception as e:
+        print("Exception found:", e)
+        raise
+    
+@router.get("/logs", summary="Gives you the summary of all call logs")
+# async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def call_logs(db: Session = Depends(get_db)):
+    try:
+        headers = {
+            'accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        # Make the POST request to the external API
+        response = requests.get(CALLBOT_URI+'/call_logs', headers=headers, auth=HTTPBasicAuth(username, password))
+
+        # Assuming the response is JSON and you want to return this response
+        return response.json()  # or adjust based on response format
+    except Exception as e:
+        print("Exception found:", e)
+        raise
+    
+@router.get("/logs/{caller_id}", summary="This endpoint allows you to get the details of conversation between user and agent")
+# async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def call_logs(caller_id, db: Session = Depends(get_db)):
+    try:
+        headers = {
+            'accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        # Make the POST request to the external API
+        response = requests.get(CALLBOT_URI+'/call_logs/'+caller_id, params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
+
+        # Assuming the response is JSON and you want to return this response
+        return response.json()  # or adjust based on response format
+    except Exception as e:
+        print("Exception found:", e)
+        raise
+    
+@router.get("/logs/{caller_id}/details", summary="This endpoint allows you to get the details of raw logs stored in the database table")
+# async def call(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def call_logs(caller_id, db: Session = Depends(get_db)):
+    try:
+        headers = {
+            'accept': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        # Make the POST request to the external API
+        response = requests.get(CALLBOT_URI+'/call_logs/'+caller_id+'/details', params={"caller_id":caller_id},headers=headers, auth=HTTPBasicAuth(username, password))
 
         # Assuming the response is JSON and you want to return this response
         return response.json()  # or adjust based on response format
