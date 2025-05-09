@@ -65,7 +65,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
-from app.api.v1.endpoints.feature import chatbot, callbot
+from app.api.v1.endpoints.feature import chatbot, callbot, asr
 
 app = FastAPI()
 
@@ -92,3 +92,4 @@ app.include_router(features.router, prefix="")
 app.include_router(admin.router, prefix="")
 app.include_router(chatbot.router, prefix="/feature/chatbot")
 app.include_router(callbot.router, prefix="/feature/callbot")
+app.include_router(asr.router, prefix="/feature/asr")

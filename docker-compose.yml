@@ -26,6 +26,8 @@ services:
     volumes:
       - ./backend:/backend
       - ./files:/files
+      - ./asr_audios:/asr_audios
+      - ./tts_audios:/tts_audios
 
     networks:
       - app-network
