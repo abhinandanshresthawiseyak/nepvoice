@@ -17,13 +17,18 @@ load_dotenv()  # This loads variables from .env into environment
 
 api_key = os.getenv("gemini_api_key")
 embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=api_key)
+PDF_FILE_LOCATION = os.getenv("PDF_FILE_LOCATION")
 
 def save_pdf_file(file, db, user_id):
     try:
         if not file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
 
+<<<<<<< HEAD
         file_location = os.path.join("D:\\saugat_branch\\nepvoice\\files", file.filename)
+=======
+        file_location = os.path.join(PDF_FILE_LOCATION, file.filename)
+>>>>>>> 33e05daa472ae572b187e712f6ae7d0881cc420c
 
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
