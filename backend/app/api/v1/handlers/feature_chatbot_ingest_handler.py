@@ -24,11 +24,7 @@ def save_pdf_file(file, db, user_id):
         if not file.filename.endswith(".pdf"):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed.")
 
-<<<<<<< HEAD
-        file_location = os.path.join("D:\\saugat_branch\\nepvoice\\files", file.filename)
-=======
         file_location = os.path.join(PDF_FILE_LOCATION, file.filename)
->>>>>>> 33e05daa472ae572b187e712f6ae7d0881cc420c
 
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -105,4 +101,3 @@ def save_to_postgres(df, db, user_id):
 # # Convert to DataFrame and display
 # chunks = get_pdf_chunks_with_metadata_pymupdf('/home/mirage/wiseyak/abhi/chatbot_indexing/test.pdf')
 # df = add_embeddings(chunks)
-

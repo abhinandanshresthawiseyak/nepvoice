@@ -30,10 +30,11 @@ def retrieve_similar_chunks(query: str, db, user_id, top_k: int = 5) -> List[dic
     query_embedding = get_query_embedding(query)
 
     sql = text(f"""
-        SELECT chunk, pdf_id, page_number, chunk_number
-        FROM vector.pdf_chunks
-        WHERE uploaded_by_user_id='{user_id}'
-        ORDER BY embedding <#> (:embedding)::vector
+        SELECT a.chunk, a.pdf_id, a.page_number, a.chunk_number, b.total_pages
+        FROM vector.pdf_chunks a
+        INNER JOIN vector.pdf b on a.pdf_id=b.id
+        WHERE a.uploaded_by_user_id=:user_id
+        ORDER BY a.embedding <#> (:embedding)::vector
         LIMIT :top_k;
     """)
     result = db.execute(sql, {
