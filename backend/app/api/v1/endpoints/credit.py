@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException,Request
 from pydantic import BaseModel
 from app.api.v1.handlers import credit_handler
 
@@ -9,8 +9,10 @@ class CreditPurchaseRequest(BaseModel):
     credit_amount: int
 
 @router.post("/simulate_purchase")
-def simulate_purchase(data: CreditPurchaseRequest):
-    new_balance, error = credit_handler.simulate_purchase(data.user_id, data.credit_amount)
+def simulate_purchase(data: CreditPurchaseRequest,request: Request):
+    session_id = request.cookies.get("session")  # get FastAPI session cookie
+    new_balance, error = credit_handler.simulate_purchase(data.user_id, data.credit_amount, session_id=session_id)
+
     if error:
         raise HTTPException(status_code=404, detail=error)
 

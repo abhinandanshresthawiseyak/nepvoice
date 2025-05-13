@@ -101,4 +101,3 @@ def save_to_postgres(df, db, user_id):
 # # Convert to DataFrame and display
 # chunks = get_pdf_chunks_with_metadata_pymupdf('/home/mirage/wiseyak/abhi/chatbot_indexing/test.pdf')
 # df = add_embeddings(chunks)
-
