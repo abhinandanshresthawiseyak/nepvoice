@@ -19,6 +19,7 @@ services:
     build: 
       context: ./backend
       dockerfile: Dockerfile
+    image: nepvoice-backend
     ports:
       - "5678:5678"
     depends_on:
@@ -28,12 +29,22 @@ services:
       - ./files:/files
       - ./asr_audios:/asr_audios
       - ./tts_audios:/tts_audios
-
     networks:
       - app-network
     restart: always
 
-  
+  nepvoice-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: nepvoice-frontend
+    restart: always
+    ports:
+      - 5679:8001
+    environment:
+      - BACKEND=https://nepvoice-backend.wiseyak.com
+    networks:
+      - app-network
 
 networks:
   app-network:

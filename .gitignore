@@ -3,3 +3,6 @@ __pycache__/
 
 backend/.env
 nepvoice-db/
+asr_audios/
+tts_audios/
+files/
