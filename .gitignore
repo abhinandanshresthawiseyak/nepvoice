@@ -5,3 +5,5 @@ backend/.env
 nepvoice-db/
 
 *.pdf
+
+static

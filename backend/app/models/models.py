@@ -95,7 +95,7 @@ class UserActivityLog(Base):
     details = Column(Text)
     ip_address = Column(String)
     user_agent = Column(Text)
-    ssid = Column(Integer)  # NEW: session id
+    ssid = Column(String(255))  # safe for encoded cookie session
     logged_in = Column(DateTime(timezone=True))  # NEW: login time
     logged_out = Column(DateTime(timezone=True))  # NEW: logout time
     created_at = Column(DateTime(timezone=True), server_default=func.now())
