@@ -37,5 +37,3 @@ app.include_router(callbot.router, prefix="/feature/callbot")
 app.include_router(asr.router, prefix="/feature/asr")
 app.include_router(tts.router, prefix="/feature/tts")
 
-# Static files middleware
-app.mount("/static", StaticFiles(directory="static"), name="static")

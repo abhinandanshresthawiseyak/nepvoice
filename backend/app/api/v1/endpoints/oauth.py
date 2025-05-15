@@ -18,66 +18,6 @@ async def login():
     url = oauth_handler.get_login_url()
     return RedirectResponse(url)
 
-# @router.get("/callback")
-# async def auth_callback(request: Request):
-#     code = request.query_params.get("code")
-#     if not code:
-#         return HTMLResponse("No authorization code provided.", status_code=400)
-
-#     name, user_id, status = await oauth_handler.handle_callback(code)
-#     request.session["user_id"] = user_id  #
-
-#     if status == "Failed to get access token.":
-#         return HTMLResponse("Failed to get access token.", status_code=400)
-
-#     html = f"""
-#     <!DOCTYPE html>
-#     <html>
-#       <head><title>Logged In</title></head>
-#       <body>
-#         <h1>✅ Login Successful</h1>
-#         <p>Hi {name}, your session has been saved.</p>
-#         <p>You can now visit <a href='/static/log.html'>the app</a>.</p>
-#         <p>You can now visit <a href='http://localhost:8000/docs'>the app</a>.</p>
-#       </body>
-#     </html>
-#     """
-
-#     response = HTMLResponse(content=html)
-#     response.set_cookie(
-#         key="ssid",
-#         value=str(ssid),
-#         httponly=False,
-#         secure=False,
-#         samesite="Lax",
-#         max_age=60 * 60 * 24 * 7
-#     )
-#     return response
-
-
-# @router.post("/logout")
-# def logout_user(request: Request, user_id: str = Query(...)):
-#     db = SessionLocal()
-#     try:
-#         session = db.query(UserActivityLog).filter(
-#             UserActivityLog.user_id == user_id,
-#             UserActivityLog.activity_type == "login",
-#             UserActivityLog.logged_out == None
-#         ).order_by(UserActivityLog.logged_in.desc()).first()
-
-#         if not session:
-#             raise HTTPException(status_code=404, detail="No active session found.")
-
-#         session.logged_out = func.now()
-#         db.commit()
-
-#         response = RedirectResponse(url="/")
-#         response.delete_cookie("ssid")
-#         return response
-#     finally:
-#         db.close()
-
-
 @router.get("/callback")
 async def auth_callback(request: Request):
     code = request.query_params.get("code")
@@ -94,45 +34,20 @@ async def auth_callback(request: Request):
     # Save user_id in session (this uses the session_id cookie under the hood)
     request.session["user_id"] = user_id
 
-    html = f"""
-    <!DOCTYPE html>
-    <html>
-      <head><title>Logged In</title></head>
-      <body>
-        <h1>✅ Login Successful</h1>
-        <p>Hi {name}, your session has been saved.</p>
-        <p>You can now visit <a href='https://nepvoice.wiseyak.com/'>the app</a>.</p>
-        <p>You can also visit <a href='http://localhost:8000/docs'>the docs</a>.</p>
-      </body>
-    </html>
-    """
-    return HTMLResponse(content=html)
-
-
-# @router.post("/logout")
-# def logout_user(request: Request):
-#     user_id = request.session.get("user_id")
-#     if not user_id:
-#         raise HTTPException(status_code=401, detail="No user session.")
-
-#     db = SessionLocal()
-#     try:
-#         session = db.query(UserActivityLog).filter(
-#             UserActivityLog.user_id == user_id,
-#             UserActivityLog.activity_type == "login",
-#             UserActivityLog.logged_out == None
-#         ).order_by(UserActivityLog.logged_in.desc()).first()
-
-#         if not session:
-#             raise HTTPException(status_code=404, detail="No active session found.")
-
-#         session.logged_out = func.now()
-#         db.commit()
-
-#         request.session.clear()  # Clear entire session
-#         return RedirectResponse(url="/")
-#     finally:
-#         db.close()
+    # html = f"""
+    # <!DOCTYPE html>
+    # <html>
+    #   <head><title>Logged In</title></head>
+    #   <body>
+    #     <h1>✅ Login Successful</h1>
+    #     <p>Hi {name}, your session has been saved.</p>
+    #     <p>You can now visit <a href='https://nepvoice.wiseyak.com/'>the app</a>.</p>
+    #     <p>You can also visit <a href='http://localhost:8000/docs'>the docs</a>.</p>
+    #   </body>
+    # </html>
+    # """
+    # return HTMLResponse(content=html)
+    return RedirectResponse(url="https://nepvoice.wiseyak.com/")
 
 @router.post("/logout")
 def logout_user(request: Request):
