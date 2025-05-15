@@ -12,12 +12,22 @@ from fastapi.staticfiles import StaticFiles  # ✅ Add this
 app = FastAPI()
 
 app.add_middleware(CORSMiddleware,
-                   allow_origins=["*"],
+                #    allow_origins=["*"],
+                   allow_origins=["https://nepvoice.wiseyak.com"],
+
                    allow_credentials=True,
                    allow_methods=["*"],
                    allow_headers=["*"])
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+# app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    session_cookie="session",              # Optional: default name
+    same_site="none",                      # Required for cross-site
+    https_only=True,                       # Required for SameSite=None
+    domain=".wiseyak.com"                  # ✅ Enables subdomain sharing
+)
 
 @app.on_event("startup")
 def startup_event():
