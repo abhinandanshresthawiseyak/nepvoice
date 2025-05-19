@@ -47,7 +47,7 @@ async def auth_callback(request: Request):
     # </html>
     # """
     # return HTMLResponse(content=html)
-    return RedirectResponse(url="https://nepvoice.wiseyak.com/")
+    return RedirectResponse(url="http://192.168.85.118:8005/app")
 
 @router.post("/logout")
 def logout_user(request: Request):
