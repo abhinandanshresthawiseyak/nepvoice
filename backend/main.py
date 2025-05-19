@@ -13,21 +13,34 @@ app = FastAPI()
 
 app.add_middleware(CORSMiddleware,
                 #    allow_origins=["*"],
-                   allow_origins=["https://nepvoice.wiseyak.com"],
+                allow_origins=["https://nepvoice.wiseyak.com"],
+                # allow_origins=["http://192.168.85.118:8005/"],
+
 
                    allow_credentials=True,
                    allow_methods=["*"],
                    allow_headers=["*"])
 
 # app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+IS_PRODUCTION = False
+
 app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
-    session_cookie="session",              # Optional: default name
-    same_site="none",                      # Required for cross-site
-    https_only=True,                       # Required for SameSite=None
-    domain=".wiseyak.com"                  # ✅ Enables subdomain sharing
+    session_cookie="session",
+    same_site="none",
+    https_only=IS_PRODUCTION,
+    domain=".wiseyak.com" if IS_PRODUCTION else None,
 )
+
+# app.add_middleware(
+#     SessionMiddleware,
+#     secret_key=SECRET_KEY,
+#     session_cookie="session",              # Optional: default name
+#     same_site="none",                      # Required for cross-site
+#     https_only=True,                       # Required for SameSite=None
+#     domain=".wiseyak.com"                  # ✅ Enables subdomain sharing
+# )
 
 @app.on_event("startup")
 def startup_event():
