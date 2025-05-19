@@ -42,7 +42,7 @@ async def auth_callback(request: Request):
     #     <h1>✅ Login Successful</h1>
     #     <p>Hi {name}, your session has been saved.</p>
     #     <p>You can now visit <a href='https://nepvoice.wiseyak.com/'>the app</a>.</p>
-    #     <p>You can also visit <a href='http://localhost:8000/docs'>the docs</a>.</p>
+    #     <p>You can also visit <a href='http://localhost:8088/docs'>the docs</a>.</p>
     #   </body>
     # </html>
     # """
