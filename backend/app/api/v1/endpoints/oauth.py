@@ -6,6 +6,7 @@ from app.models.models import UserActivityLog
 from app.database.database import SessionLocal
 from sqlalchemy import func
 from app.api.v1.handlers.session import get_logged_in_user
+from app.core.config import PRODUCTION,frontend_url
 
 router = APIRouter()
 
@@ -33,21 +34,11 @@ async def auth_callback(request: Request):
 
     # Save user_id in session (this uses the session_id cookie under the hood)
     request.session["user_id"] = user_id
+    
+    return RedirectResponse(url=frontend_url)
 
-    # html = f"""
-    # <!DOCTYPE html>
-    # <html>
-    #   <head><title>Logged In</title></head>
-    #   <body>
-    #     <h1>✅ Login Successful</h1>
-    #     <p>Hi {name}, your session has been saved.</p>
-    #     <p>You can now visit <a href='https://nepvoice.wiseyak.com/'>the app</a>.</p>
-    #     <p>You can also visit <a href='http://localhost:8088/docs'>the docs</a>.</p>
-    #   </body>
-    # </html>
-    # """
-    # return HTMLResponse(content=html)
-    return RedirectResponse(url="http://192.168.85.118:8005/app")
+    
+
 
 @router.post("/logout")
 def logout_user(request: Request):
