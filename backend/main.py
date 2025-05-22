@@ -8,39 +8,41 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.api.v1.endpoints.feature import chatbot, callbot, asr, tts
 from fastapi.staticfiles import StaticFiles  # ✅ Add this
+from app.core.config import ALLOWED_ORIGINS
+#("ALLOWED_ORIGINS").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]  
+from app.core.config import PRODUCTION
 
 app = FastAPI()
 
 app.add_middleware(CORSMiddleware,
-                #    allow_origins=["*"],
-                allow_origins=["https://nepvoice.wiseyak.com"],
-                # allow_origins=["http://192.168.85.118:8005/"],
-
-
+                allow_origins=ALLOWED_ORIGINS,
                    allow_credentials=True,
-                   allow_methods=["*"],
+                   allow_methods=["*"], # Allows all HTTP methods
                    allow_headers=["*"])
 
 # app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
-IS_PRODUCTION = False
 
-app.add_middleware(
+if PRODUCTION:
+    app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
-    session_cookie="session",
-    same_site="none",
-    https_only=IS_PRODUCTION,
-    domain=".wiseyak.com" if IS_PRODUCTION else None,
-)
+    session_cookie="session",              # Optional: default name
+    same_site="none",                      # Required for cross-site
+    https_only=True,                       # Required for SameSite=None
+    domain=".wiseyak.com")   
+                   # ✅ Enables subdomain sharing
+else:
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=SECRET_KEY,
+        session_cookie="session_login",
+        same_site="lax",       # ← change from "none" to "lax"
+        https_only=False,      # ← must be False for HTTP
+        domain=None,           # ← don't set domain unless using subdomains
+    )
+    """the above code is for local development"""
 
-# app.add_middleware(
-#     SessionMiddleware,
-#     secret_key=SECRET_KEY,
-#     session_cookie="session",              # Optional: default name
-#     same_site="none",                      # Required for cross-site
-#     https_only=True,                       # Required for SameSite=None
-#     domain=".wiseyak.com"                  # ✅ Enables subdomain sharing
-# )
+
 
 @app.on_event("startup")
 def startup_event():

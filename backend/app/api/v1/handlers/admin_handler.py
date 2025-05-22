@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
 from app.database.database import SessionLocal
 from app.models.models import User, UserCredit, CreditUsage, UserActivityLog
+from app.models.models import UserRole
+from sqlalchemy.exc import IntegrityError
 
 def is_admin(user_id: str):
     db: Session = SessionLocal()
@@ -57,3 +59,43 @@ def get_all_users_details():
         return details
     finally:
         db.close()
+
+
+def add_role(role_name: str, role_level: int):
+    session = SessionLocal()
+    try:
+        if session.query(UserRole).filter_by(role_name=role_name).first():
+            return False, "Role already exists."
+
+        new_role = UserRole(role_name=role_name, role_level=role_level)
+        session.add(new_role)
+        session.commit()
+        return True, "Role added successfully."
+    except IntegrityError:
+        session.rollback()
+        return False, "Integrity error. Possibly duplicate or invalid input."
+    finally:
+        session.close()
+
+
+def delete_role(role_name: str):
+    session = SessionLocal()
+    try:
+        role = session.query(UserRole).filter_by(role_name=role_name).first()
+        if not role:
+            return False, "Role not found."
+
+        session.delete(role)
+        session.commit()
+        return True, "Role deleted successfully."
+    finally:
+        session.close()
+
+
+def get_all_roles():
+    session = SessionLocal()
+    try:
+        roles = session.query(UserRole).all()
+        return [{"role_name": r.role_name, "role_level": r.role_level} for r in roles]
+    finally:
+        session.close()
