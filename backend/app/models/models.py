@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -47,6 +48,9 @@ class User(Base):
     role_level = Column(Integer, nullable=False, default=1)  # <-- NEW!
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login_at = Column(DateTime(timezone=True))
+    tts_history = relationship("TTSHistory", back_populates="user")
+    asr_history = relationship("ASRHistory", back_populates="user")
+
 
 
 class UserCredit(Base):
@@ -124,3 +128,30 @@ class UserRole(Base):
     __table_args__ = (
         CheckConstraint('role_level > 0', name='check_role_level_positive'),
     )
+
+
+class TTSHistory(Base):
+    __tablename__ = "tts_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    text = Column(String, nullable=False)
+    language = Column(String, nullable=False)
+    audio_file_path = Column(String, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now)
+
+    user = relationship("User", back_populates="tts_history")
+
+
+
+class ASRHistory(Base):
+    __tablename__ = "asr_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    language = Column(String)
+    transcript = Column(String)
+    audio_path = Column(String)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="asr_history")

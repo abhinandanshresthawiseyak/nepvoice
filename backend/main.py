@@ -26,22 +26,29 @@ if PRODUCTION:
     app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
-    session_cookie="session",              # Optional: default name
+    session_cookie="session_login",              # Optional: default name
     same_site="none",                      # Required for cross-site
     https_only=True,                       # Required for SameSite=None
     domain=".wiseyak.com")   
                    # ✅ Enables subdomain sharing
 else:
-    app.add_middleware(
-        SessionMiddleware,
-        secret_key=SECRET_KEY,
-        session_cookie="session_login",
-        same_site="lax",       # ← change from "none" to "lax"
-        https_only=False,      # ← must be False for HTTP
-        domain=None,           # ← don't set domain unless using subdomains
-    )
-    """the above code is for local development"""
-
+    # app.add_middleware(
+    #     SessionMiddleware,
+    #     secret_key=SECRET_KEY,
+    #     session_cookie="session_login",
+    #     same_site="lax",       # ← change from "none" to "lax"
+    #     https_only=False,      # ← must be False for HTTP
+    #     domain=None,           # ← don't set domain unless using subdomains
+    # )
+    # """the above code is for local development"""
+        app.add_middleware(
+    SessionMiddleware,
+    secret_key=SECRET_KEY,
+    session_cookie="session_login",              # Optional: default name
+    same_site="none",                      # Required for cross-site
+    https_only=True,                       # Required for SameSite=None
+    domain=".wiseyak.com")   
+        
 
 
 @app.on_event("startup")
