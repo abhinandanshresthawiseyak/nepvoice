@@ -1,0 +1,81 @@
+services:
+  abhi-nepvoice-database:
+    image: ankane/pgvector:latest 
+    environment:
+      POSTGRES_USER: nepvoice
+      POSTGRES_PASSWORD: nepvoice
+      POSTGRES_DB: nepvoice
+    ports:
+      - "7812:5432"
+    networks:
+      - nepvoice-abhi-network
+    restart: always
+    volumes:
+      - ./nepvoice-db:/var/lib/postgresql/data
+
+  abhi-nepvoice-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    image: abhi-nepvoice-backend
+    ports:
+      - "7813:5678"
+    depends_on:
+      - abhi-nepvoice-database
+    volumes:
+      - ./backend:/backend
+      - ./files:/files
+      - ./asr_audios:/asr_audios
+      - ./tts_audios:/tts_audios
+    networks:
+      - nepvoice-abhi-network
+    restart: always
+
+  abhi-nepvoice-tts-request-consumer-1:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+    container_name: tts-request-consumer-1
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-tts-request-consumer-2:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+    container_name: tts-request-consumer-2
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-tts-response-consumer:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Response-Consumer/Dockerfile
+    container_name: tts-response-consumer
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "7814:9000"    # S3 API
+      - "7815:9001"    # Web UI
+    volumes:
+      - ./minio_data:/data
+    environment:
+      MINIO_ROOT_USER: nepvoice
+      MINIO_ROOT_PASSWORD: nepvoice
+    command: server --console-address ":9001" /data
+    networks:
+      - nepvoice-abhi-network
+      
+networks:
+  nepvoice-abhi-network:
+    driver: bridge
