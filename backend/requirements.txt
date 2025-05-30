@@ -16,3 +16,4 @@ pgvector
 websockets
 confluent_kafka
 boto3
+pusher

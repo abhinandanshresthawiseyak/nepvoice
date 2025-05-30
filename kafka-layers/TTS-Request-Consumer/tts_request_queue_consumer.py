@@ -1,7 +1,9 @@
 from backend.app.api.v2.handlers.feature_tts_handler import generate_tts_audio
 from backend.app.utils.kafkaclient import KafkaClient
-import time, json
-import logging
+from backend.app.utils.minio_utils import upload_audio_to_minio
+import time, json, base64, logging
+from datetime import datetime
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -31,8 +33,12 @@ try:
             data = json.loads(msg.value().decode('utf-8'))
             # logger.info(data)
             audio_bytes=generate_tts_audio(text=data['text'], language=data['lang'])
-            logger.info(f"Audio length: {len(audio_bytes)}, Type: {type(audio_bytes)}")
-            kafkaClient.producer.produce('tts_response_queue_topic', key=data['request_id']+str(data['text']), value=audio_bytes, callback=kafkaClient.delivery_report)
+            object_name=upload_audio_to_minio(bucket_name='tts-audios', object_name=f"{data['request_id']}.wav", audio_bytes=audio_bytes, content_type='audio/wav')
+            if object_name is None:
+                logger.info("Failed to upload audio to MinIO")
+                continue
+            logger.info(f"Audio length: {len(audio_bytes)}, Type: {type(audio_bytes)}, Object Name: {object_name}")
+            kafkaClient.producer.produce('tts_response_queue_topic', key=data['request_id'], value=json.dumps({'request_id':data['request_id'],'bucket_name':'tts-audios' ,'object_name':object_name, 'text':data['text'], 'language':data['lang'], 'audio_size':len(audio_bytes), 'created_at': str(datetime.now())}), callback=kafkaClient.delivery_report)
             logger.info(f"Produced message at key {data['request_id']}")
         except Exception as e:
             logger.info(f"Error while polling messages: {e}")

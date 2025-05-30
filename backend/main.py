@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles  # ✅ Add this
 from app.core.config import ALLOWED_ORIGINS
 #("ALLOWED_ORIGINS").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]  
 from app.core.config import PRODUCTION
+# from app.utils.ksql_utils import create_stream_and_table_in_kafka_ksql_db
 
 app = FastAPI()
 
@@ -48,6 +49,7 @@ else:
 @app.on_event("startup")
 def startup_event():
     init_db()
+    # create_stream_and_table_in_kafka_ksql_db()
 
 @app.get("/")
 async def root():

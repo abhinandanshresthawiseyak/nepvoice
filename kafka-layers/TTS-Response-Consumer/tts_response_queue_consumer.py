@@ -2,10 +2,21 @@ from backend.app.utils.kafkaclient import KafkaClient
 import time, json
 from datetime import datetime
 import logging
+import pusher
+import base64
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
+    pusher_client = pusher.Pusher(
+        app_id='1999579',
+        key='043a1db401ff46a9467c',
+        secret='d567dae60b444305e93e',
+        cluster='ap2',
+        ssl=True
+    )
+    
     kafkaClient = KafkaClient(bootstrap_servers='192.168.88.40:19092')
     kafkaClient.initialize_consumer(group_id='tts-response-consumer-group')
     kafkaClient.consumer.subscribe(['tts_response_queue_topic'])
@@ -28,15 +39,12 @@ try:
                 logger.info(f"Error: {msg.error()}")
                 continue
             
-            data = msg.value()
-            
-            # 🔊 Save audio to file
-            timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S_%f")
-            filename = f"/app/tts_audios/tts_audio_{timestamp}.mp3"  # or .wav depending on format
-            with open(filename, "wb") as f:
-                f.write(data)
-            logger.info(f"✅ Saved audio to: {filename}")
-            
+            channel_id=msg.key().decode('utf-8')
+            logger.info(f"Received message for channel: {channel_id}")
+            data = json.loads(msg.value().decode('utf-8'))
+            logger.info(f"Data received: {len(data['object_name'])} bytes for request_id {data['request_id']}")
+            # pusher_client.trigger(channel_id, 'my-event', data)
+
         except Exception as e:
             logger.info(f"Error while polling messages: {e}")
             break

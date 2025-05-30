@@ -1,4 +1,4 @@
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from requests import Session
 from app.database.database import get_db
 from app.models.models import User
@@ -9,8 +9,10 @@ import uuid, json
 from app.core.enums import LangEnum
 from app.api.v2.handlers.feature_tts_handler import generate_tts_audio
 from app.utils.kafkaclient import KafkaClient
+from app.utils.minio_utils import read_object_from_minio
 from datetime import datetime
-
+from io import BytesIO
+import random
 # Load environment variables
 load_dotenv()
 
@@ -30,7 +32,10 @@ except Exception as e:
 @router.get("", summary="This endpoint accepts text and returns audio file")
 # async def speak_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
 async def get_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db)):
-    request_id=str(uuid.uuid4())
+    # Generate UUID
+    base_id = str(uuid.uuid4())
+    extra_random = str(random.randint(10**7, 10**8 - 1))  # ensures 8 digits
+    request_id = f"{base_id}-{extra_random}"
     try:
         kafkaClient.producer.produce('tts_request_queue_topic', key=request_id, value=json.dumps({"request_id": request_id, "type": "tts_queue","lang":lang,"text":text, "timestamp": str(datetime.now())}), callback=kafkaClient.delivery_report)
         kafkaClient.producer.flush()
@@ -42,4 +47,15 @@ async def get_audio(request: Request, text:str, lang:LangEnum, db: Session = Dep
     
     # audio_file_path=generate_tts_audio(text=text,language=lang)
     # return FileResponse(path=audio_file_path, media_type="audio/wav")
-  
+
+@router.get("/{request_id}", summary="This endpoint accepts text and returns audio file")
+# async def speak_audio(request: Request, request_id:str, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def get_audio(request: Request, request_id:str, db: Session = Depends(get_db)):
+    try:
+        object_name=f"{request_id}.wav"
+        audio_data=read_object_from_minio(bucket_name='tts-audios', object_name=object_name)
+        audio_stream = BytesIO(audio_data)
+        return StreamingResponse(audio_stream, media_type="audio/wav", headers={"Content-Disposition": f"inline; filename={object_name}"})
+    except Exception as e:
+        print(f"Error retrieving audio for request_id {request_id}: {e}")
+        raise HTTPException(status_code=404, detail=f"Audio not found for request_id: {request_id}")

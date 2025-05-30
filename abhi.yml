@@ -1,4 +1,34 @@
 services:
+  # abhi-nepvoice-ksqldb-server:
+  #   image: confluentinc/ksqldb-server:latest
+  #   container_name: abhi-nepvoice-ksqldb-server
+  #   networks:
+  #     - nepvoice-abhi-network
+  #   ports:
+  #     - "7816:8088"
+  #   environment:
+  #     KSQL_BOOTSTRAP_SERVERS: 192.168.88.40:19092
+  #     KSQL_LISTENERS: http://0.0.0.0:8088
+  #     KSQL_KSQL_CONNECT_WORKER_CONFIG: ""
+  #     KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8088/info"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 30s
+    
+  # abhi-nepvoice-ksqldb-cli:
+  #   image: confluentinc/ksqldb-cli:latest
+  #   container_name: abhi-nepvoice-ksqldb-cli
+  #   networks:
+  #     - nepvoice-abhi-network
+  #   depends_on:
+  #     - abhi-nepvoice-ksqldb-server
+  #   entrypoint: /bin/sh
+  #   tty: true
+
   abhi-nepvoice-database:
     image: ankane/pgvector:latest 
     environment:
@@ -12,6 +42,11 @@ services:
     restart: always
     volumes:
       - ./nepvoice-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nepvoice"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   abhi-nepvoice-backend:
     build: 
@@ -21,7 +56,10 @@ services:
     ports:
       - "7813:5678"
     depends_on:
-      - abhi-nepvoice-database
+      abhi-nepvoice-database:
+        condition: service_healthy
+      # abhi-nepvoice-ksqldb-server:
+      #   condition: service_healthy
     volumes:
       - ./backend:/backend
       - ./files:/files
@@ -30,6 +68,8 @@ services:
     networks:
       - nepvoice-abhi-network
     restart: always
+    # environment:
+    #   - KSQLDB_URL=http://abhi-nepvoice-ksqldb-server:8088
 
   abhi-nepvoice-tts-request-consumer-1:
     build:
