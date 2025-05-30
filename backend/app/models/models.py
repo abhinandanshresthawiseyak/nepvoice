@@ -1,7 +1,7 @@
-from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint
+from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint,JSON
 from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
-from datetime import datetime
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -155,3 +155,19 @@ class ASRHistory(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     user = relationship("User", back_populates="asr_history")
+
+
+
+class UserDetails(Base):
+    __tablename__ = "user_details"
+
+    id = Column(Integer, primary_key=True, index=True)
+    caller_id = Column(String, index=True)
+    name = Column(String, index=True)
+    phone_number = Column(String, index=True)
+    call_type = Column(JSON)  # OPTIONAL: if you want a minimal copy in Postgres too
+    tts_folder_location = Column(String, index=True)
+    status = Column(String, index=True)
+    assigned_container = Column(String, index=True)
+    scheduled_for_utc = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    modified_on_utc = Column(DateTime, default=lambda: datetime.now(timezone.utc))

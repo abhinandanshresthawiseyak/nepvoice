@@ -12,6 +12,11 @@ from app.core.config import ALLOWED_ORIGINS
 #("ALLOWED_ORIGINS").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]  
 from app.core.config import PRODUCTION
 
+from app.database.mongo import ping_mongo
+import logging
+logging.basicConfig(level=logging.INFO)
+
+
 app = FastAPI()
 
 app.add_middleware(CORSMiddleware,
@@ -50,10 +55,11 @@ else:
     domain=".wiseyak.com")   
         
 
-
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     init_db()
+    await ping_mongo()
+
 
 @app.get("/")
 async def root():
