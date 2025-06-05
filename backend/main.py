@@ -7,15 +7,17 @@ from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from app.api.v1.endpoints.feature import chatbot, callbot, asr, tts
+from app.api.v2.endpoints.feature import tts as tts_v2, asr as asr_v2
 from fastapi.staticfiles import StaticFiles  # ✅ Add this
 from app.core.config import ALLOWED_ORIGINS
 #("ALLOWED_ORIGINS").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]  
 from app.core.config import PRODUCTION
+# from app.utils.ksql_utils import create_stream_and_table_in_kafka_ksql_db
 
 app = FastAPI()
 
 app.add_middleware(CORSMiddleware,
-                allow_origins=ALLOWED_ORIGINS,
+                allow_origins=["*"],
                    allow_credentials=True,
                    allow_methods=["*"], # Allows all HTTP methods
                    allow_headers=["*"])
@@ -47,6 +49,7 @@ else:
 @app.on_event("startup")
 def startup_event():
     init_db()
+    # create_stream_and_table_in_kafka_ksql_db()
 
 @app.get("/")
 async def root():
@@ -61,4 +64,7 @@ app.include_router(chatbot.router, prefix="/feature/chatbot")
 app.include_router(callbot.router, prefix="/feature/callbot")
 app.include_router(asr.router, prefix="/feature/asr")
 app.include_router(tts.router, prefix="/feature/tts")
+
+app.include_router(asr_v2.router, prefix="/v2/feature/asr")
+app.include_router(tts_v2.router, prefix="/v2/feature/tts")
 

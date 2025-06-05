@@ -1,0 +1,130 @@
+services:
+  abhi-nepvoice-database:
+    image: ankane/pgvector:latest 
+    environment:
+      POSTGRES_USER: nepvoice
+      POSTGRES_PASSWORD: nepvoice
+      POSTGRES_DB: nepvoice
+    ports:
+      - "7812:5432"
+    networks:
+      - nepvoice-abhi-network
+    restart: always
+    volumes:
+      - ./nepvoice-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nepvoice"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  abhi-nepvoice-backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    image: abhi-nepvoice-backend
+    ports:
+      - "7813:5678"
+    depends_on:
+      abhi-nepvoice-database:
+        condition: service_healthy
+      # abhi-nepvoice-ksqldb-server:
+      #   condition: service_healthy
+    volumes:
+      - ./backend:/backend
+      - ./files:/files
+      - ./asr_audios:/asr_audios
+      - ./tts_audios:/tts_audios
+    networks:
+      - nepvoice-abhi-network
+    restart: always
+    # environment:
+    #   - KSQLDB_URL=http://abhi-nepvoice-ksqldb-server:8088
+
+  abhi-nepvoice-tts-streaming-request-consumer-1:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Streaming-Request-Consumer/Dockerfile
+    container_name: tts-streaming-request-consumer-1
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-tts-request-consumer-1:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+    container_name: tts-request-consumer-1
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-tts-request-consumer-2:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+    container_name: tts-request-consumer-2
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-tts-response-consumer:
+    build:
+      context: .
+      dockerfile: kafka-layers/TTS-Response-Consumer/Dockerfile
+    container_name: tts-response-consumer
+    volumes:
+      - ./backend:/app/backend
+      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "7814:9000"    # S3 API
+      - "7815:9001"    # Web UI
+    volumes:
+      - ./minio_data:/data
+    environment:
+      MINIO_ROOT_USER: nepvoice
+      MINIO_ROOT_PASSWORD: nepvoice
+    command: server --console-address ":9001" /data
+    networks:
+      - nepvoice-abhi-network
+      
+  # abhi-nepvoice-ksqldb-server:
+  #   image: confluentinc/ksqldb-server:latest
+  #   container_name: abhi-nepvoice-ksqldb-server
+  #   networks:
+  #     - nepvoice-abhi-network
+  #   ports:
+  #     - "7816:8088"
+  #   environment:
+  #     KSQL_BOOTSTRAP_SERVERS: 192.168.88.40:19092
+  #     KSQL_LISTENERS: http://0.0.0.0:8088
+  #     KSQL_KSQL_CONNECT_WORKER_CONFIG: ""
+  #     KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
+  #     KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8088/info"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 30s
+    
+  # abhi-nepvoice-ksqldb-cli:
+  #   image: confluentinc/ksqldb-cli:latest
+  #   container_name: abhi-nepvoice-ksqldb-cli
+  #   networks:
+  #     - nepvoice-abhi-network
+  #   depends_on:
+  #     - abhi-nepvoice-ksqldb-server
+  #   entrypoint: /bin/sh
+  #   tty: true
+networks:
+  nepvoice-abhi-network:
+    driver: bridge

@@ -33,7 +33,7 @@ def generate_tts_audio(text: str, language: str):
         audio_filename = f"{uuid.uuid4()}.wav"
         audio_file_path = os.path.join(TTS_FILE_LOCATION, audio_filename)
         with open(audio_file_path, "wb") as audio_file:
-            audio_file.write(response.content)
+            audio_file.write( )
         return audio_file_path
     except requests.exceptions.Timeout:
         audio_path_tts = "connection timeout"
