@@ -8,3 +8,8 @@ nepvoice-db/
 
 static
 outh_dummy.py
+*.wav
+*.mp3
+test_code.py
+
+mongo.py

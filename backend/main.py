@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from app.database.database import init_db
-from app.api.v1.endpoints import oauth, credit, features, admin
+from app.api.v1.endpoints import oauth, credit, features, admin, user
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +13,11 @@ from app.core.config import ALLOWED_ORIGINS
 #("ALLOWED_ORIGINS").split(",") if os.getenv("ALLOWED_ORIGINS") else ["*"]  
 from app.core.config import PRODUCTION
 # from app.utils.ksql_utils import create_stream_and_table_in_kafka_ksql_db
+
+from app.database.mongo import ping_mongo
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 app = FastAPI()
 
@@ -28,7 +33,7 @@ if PRODUCTION:
     app.add_middleware(
     SessionMiddleware,
     secret_key=SECRET_KEY,
-    session_cookie="session",              # Optional: default name
+    session_cookie="session_login",              # Optional: default name
     same_site="none",                      # Required for cross-site
     https_only=True,                       # Required for SameSite=None
     domain=".wiseyak.com")   
@@ -42,13 +47,20 @@ else:
         https_only=False,      # ← must be False for HTTP
         domain=None,           # ← don't set domain unless using subdomains
     )
-    """the above code is for local development"""
-
-
+    # """the above code is for local development"""
+    #     app.add_middleware(
+    # SessionMiddleware,
+    # secret_key=SECRET_KEY,
+    # session_cookie="session_login",              # Optional: default name
+    # same_site="none",                      # Required for cross-site
+    # https_only=True,                       # Required for SameSite=None
+    # domain=".wiseyak.com")   
+        
 
 @app.on_event("startup")
-def startup_event():
+async def startup_event():
     init_db()
+    await ping_mongo()
     # create_stream_and_table_in_kafka_ksql_db()
 
 @app.get("/")
@@ -56,6 +68,7 @@ async def root():
     return HTMLResponse('<a href="/auth/login">Login with Google</a>')
 
 # Include routers
+app.include_router(user.router, prefix="/api/v1/auth")
 app.include_router(oauth.router, prefix="/auth")
 app.include_router(credit.router, prefix="/credits")
 app.include_router(features.router, prefix="")

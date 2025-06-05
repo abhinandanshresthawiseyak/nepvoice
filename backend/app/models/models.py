@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint
+from sqlalchemy import Column, String, Integer, Boolean, BigInteger, Text, DateTime, ForeignKey, func, UniqueConstraint, CheckConstraint,JSON
 from sqlalchemy.orm import declarative_base, relationship
 from pgvector.sqlalchemy import Vector
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -47,6 +48,10 @@ class User(Base):
     role_level = Column(Integer, nullable=False, default=1)  # <-- NEW!
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login_at = Column(DateTime(timezone=True))
+    tts_history = relationship("TTSHistory", back_populates="user")
+    asr_history = relationship("ASRHistory", back_populates="user")
+    api_key = Column(String, unique=True, index=True, nullable=True)  
+
 
 
 class UserCredit(Base):
@@ -124,3 +129,46 @@ class UserRole(Base):
     __table_args__ = (
         CheckConstraint('role_level > 0', name='check_role_level_positive'),
     )
+
+
+class TTSHistory(Base):
+    __tablename__ = "tts_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"))
+    text = Column(String, nullable=False)
+    language = Column(String, nullable=False)
+    audio_file_path = Column(String, nullable=False)
+    timestamp = Column(DateTime, default=datetime.now)
+
+    user = relationship("User", back_populates="tts_history")
+
+
+
+class ASRHistory(Base):
+    __tablename__ = "asr_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    language = Column(String)
+    transcript = Column(String)
+    audio_path = Column(String)
+    created_at = Column(DateTime, default=datetime.now)
+
+    user = relationship("User", back_populates="asr_history")
+
+
+
+class UserDetails(Base):
+    __tablename__ = "user_details"
+
+    id = Column(Integer, primary_key=True, index=True)
+    caller_id = Column(String, index=True)
+    name = Column(String, index=True)
+    phone_number = Column(String, index=True)
+    call_type = Column(JSON)  # OPTIONAL: if you want a minimal copy in Postgres too
+    tts_folder_location = Column(String, index=True)
+    status = Column(String, index=True)
+    assigned_container = Column(String, index=True)
+    scheduled_for_utc = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    modified_on_utc = Column(DateTime, default=lambda: datetime.now(timezone.utc))
