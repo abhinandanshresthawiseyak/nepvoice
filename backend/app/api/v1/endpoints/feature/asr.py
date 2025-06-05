@@ -41,3 +41,4 @@ async def speak_audio(request: Request, lang:LangEnum, audio_file: UploadFile = 
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while processing the audio file. {e}")
+    

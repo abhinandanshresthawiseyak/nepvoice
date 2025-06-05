@@ -17,3 +17,5 @@ websockets
 confluent_kafka
 boto3
 pusher
+urlextract
+pydub
