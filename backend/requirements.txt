@@ -19,3 +19,5 @@ boto3
 pusher
 urlextract
 pydub
+motor
+dnspython
