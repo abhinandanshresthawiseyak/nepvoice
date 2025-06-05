@@ -13,3 +13,9 @@ langchain
 langchain_google_genai
 pymupdf
 pgvector
+websockets
+confluent_kafka
+boto3
+pusher
+urlextract
+pydub

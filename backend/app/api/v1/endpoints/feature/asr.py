@@ -158,11 +158,6 @@ async def speak_audio(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while processing the audio file. {e}")
 
-
-
-
-
-
 @router.get("/history", summary="Get all ASR history of the current user")
 async def get_asr_history(
     db: Session = Depends(get_db),
@@ -240,5 +235,3 @@ async def speak_audio(
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing audio file: {e}")
-
-
