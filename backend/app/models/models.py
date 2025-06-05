@@ -50,6 +50,7 @@ class User(Base):
     last_login_at = Column(DateTime(timezone=True))
     tts_history = relationship("TTSHistory", back_populates="user")
     asr_history = relationship("ASRHistory", back_populates="user")
+    api_key = Column(String, unique=True, index=True, nullable=True)  
 
 
 
@@ -152,7 +153,7 @@ class ASRHistory(Base):
     language = Column(String)
     transcript = Column(String)
     audio_path = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.now)
 
     user = relationship("User", back_populates="asr_history")
 

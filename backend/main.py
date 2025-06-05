@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from app.database.database import init_db
-from app.api.v1.endpoints import oauth, credit, features, admin
+from app.api.v1.endpoints import oauth, credit, features, admin, user
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import SECRET_KEY
 from fastapi.middleware.cors import CORSMiddleware
@@ -37,22 +37,22 @@ if PRODUCTION:
     domain=".wiseyak.com")   
                    # ✅ Enables subdomain sharing
 else:
-    # app.add_middleware(
-    #     SessionMiddleware,
-    #     secret_key=SECRET_KEY,
-    #     session_cookie="session_login",
-    #     same_site="lax",       # ← change from "none" to "lax"
-    #     https_only=False,      # ← must be False for HTTP
-    #     domain=None,           # ← don't set domain unless using subdomains
-    # )
+    app.add_middleware(
+        SessionMiddleware,
+        secret_key=SECRET_KEY,
+        session_cookie="session_login",
+        same_site="lax",       # ← change from "none" to "lax"
+        https_only=False,      # ← must be False for HTTP
+        domain=None,           # ← don't set domain unless using subdomains
+    )
     # """the above code is for local development"""
-        app.add_middleware(
-    SessionMiddleware,
-    secret_key=SECRET_KEY,
-    session_cookie="session_login",              # Optional: default name
-    same_site="none",                      # Required for cross-site
-    https_only=True,                       # Required for SameSite=None
-    domain=".wiseyak.com")   
+    #     app.add_middleware(
+    # SessionMiddleware,
+    # secret_key=SECRET_KEY,
+    # session_cookie="session_login",              # Optional: default name
+    # same_site="none",                      # Required for cross-site
+    # https_only=True,                       # Required for SameSite=None
+    # domain=".wiseyak.com")   
         
 
 @app.on_event("startup")
@@ -66,6 +66,7 @@ async def root():
     return HTMLResponse('<a href="/auth/login">Login with Google</a>')
 
 # Include routers
+app.include_router(user.router, prefix="/api/v1/auth")
 app.include_router(oauth.router, prefix="/auth")
 app.include_router(credit.router, prefix="/credits")
 app.include_router(features.router, prefix="")
