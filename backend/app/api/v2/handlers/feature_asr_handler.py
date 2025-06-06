@@ -1,12 +1,12 @@
 import requests, io
 from app.utils.minio_utils import read_object_from_minio
 
-def send_audio(url: str, audio_name: str) -> dict:
+def send_audio(url: str, bucket_name: str, object_name:str) -> dict:
     headers = {
         'accept': 'application/json',
     }
 
-    audio_bytes = read_object_from_minio(bucket_name='asr-audios', object_name=audio_name)
+    audio_bytes = read_object_from_minio(bucket_name=bucket_name, object_name=object_name)
     
     # Set a filename and content type for the multipart/form-data
     file = {

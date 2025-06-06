@@ -32,9 +32,9 @@ services:
       #   condition: service_healthy
     volumes:
       - ./backend:/backend
-      - ./files:/files
-      - ./asr_audios:/asr_audios
-      - ./tts_audios:/tts_audios
+      # - ./files:/files
+      # - ./asr_audios:/asr_audios
+      # - ./tts_audios:/tts_audios
     networks:
       - nepvoice-abhi-network
     restart: always
@@ -48,7 +48,7 @@ services:
     container_name: tts-streaming-request-consumer-1
     volumes:
       - ./backend:/app/backend
-      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
     restart: unless-stopped
 
   abhi-nepvoice-tts-request-consumer-1:
@@ -58,7 +58,7 @@ services:
     container_name: tts-request-consumer-1
     volumes:
       - ./backend:/app/backend
-      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
     restart: unless-stopped
 
   abhi-nepvoice-tts-request-consumer-2:
@@ -68,7 +68,7 @@ services:
     container_name: tts-request-consumer-2
     volumes:
       - ./backend:/app/backend
-      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
     restart: unless-stopped
 
   abhi-nepvoice-tts-response-consumer:
@@ -78,7 +78,27 @@ services:
     container_name: tts-response-consumer
     volumes:
       - ./backend:/app/backend
-      - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-asr-request-consumer-1:
+    build:
+      context: .
+      dockerfile: kafka-layers/ASR-Request-Consumer/Dockerfile
+    container_name: asr-request-consumer-1
+    volumes:
+      - ./backend:/app/backend
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+    restart: unless-stopped
+
+  abhi-nepvoice-asr-response-consumer:
+    build:
+      context: .
+      dockerfile: kafka-layers/ASR-Response-Consumer/Dockerfile
+    container_name: asr-response-consumer
+    volumes:
+      - ./backend:/app/backend
+      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
     restart: unless-stopped
 
   minio:

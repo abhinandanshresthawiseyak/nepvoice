@@ -138,7 +138,9 @@ class TTSHistory(Base):
     user_id = Column(String, ForeignKey("users.id"))
     text = Column(String, nullable=False)
     language = Column(String, nullable=False)
-    audio_file_path = Column(String, nullable=False)
+    bucket_name = Column(String, nullable=False)
+    object_name = Column(String, nullable=False)
+    # audio_file_path = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.now)
 
     user = relationship("User", back_populates="tts_history")
@@ -152,7 +154,9 @@ class ASRHistory(Base):
     user_id = Column(String, ForeignKey("users.id"), nullable=True)
     language = Column(String)
     transcript = Column(String)
-    audio_path = Column(String)
+    # audio_path = Column(String)
+    bucket_name = Column(String)
+    object_name = Column(String)
     created_at = Column(DateTime, default=datetime.now)
 
     user = relationship("User", back_populates="asr_history")

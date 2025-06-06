@@ -55,7 +55,7 @@ def upload_audio_to_minio(
             ExtraArgs={"ContentType": content_type}
         )
 
-        return object_name
+        return bucket_name, object_name
 
     except (BotoCoreError, ClientError) as e:
         print(f"❌ MinIO upload error: {e}")

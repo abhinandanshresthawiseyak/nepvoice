@@ -21,11 +21,15 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+KAFKA_SERVER = os.getenv("KAFKA_SERVER")
+# TTS_OBJECT_PREFIX = os.getenv("TTS_OBJECT_PREFIX")
+MINIO_BUCKET = os.getenv("MINIO_BUCKET")
+
 router = APIRouter()
 
 try:
     # Initialize Kafka client
-    kafkaClient = KafkaClient(bootstrap_servers='192.168.88.40:19092, 192.168.88.40:19093')
+    kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
     kafkaClient.initialize_producer()
     kafkaClient.initialize_admin_client()
     kafkaClient.create_topic(topic_name='tts_request_queue_topic', num_partitions=3, replication_factor=1, config={"max.message.bytes": 10485760})
@@ -74,17 +78,22 @@ async def get_audio_stream_for_request(request: Request, request_id:str, db: Ses
 
 
 @router.get("", summary="This endpoint accepts text and returns audio file")
-# async def speak_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-async def get_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db)):
+async def speak_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+# async def get_audio(request: Request, text:str, lang:LangEnum, db: Session = Depends(get_db)):
     # Generate UUID
     base_id = str(uuid.uuid4())
     extra_random = str(random.randint(10**7, 10**8 - 1))  # ensures 8 digits
     request_id = f"{base_id}-{extra_random}"
-    # segments=TTSPreprocessor().preprocess_and_split_text(text=text, language=lang)
+    
+    ip_address = request.client.host if request else "unknown"
+    user_agent = request.headers.get("user-agent") if request else "unknown"
+    session_id = request.cookies.get("session")
+    user_id=current_user.id
+    
     try:
         # for segment in segments:
             # kafkaClient.producer.produce('tts_request_queue_topic', key=request_id, value=json.dumps({"request_id": request_id, "type": "tts_queue","lang":lang,"text":segment, "timestamp": str(datetime.now())}), callback=kafkaClient.delivery_report)
-        kafkaClient.producer.produce('tts_request_queue_topic', key=request_id, value=json.dumps({"request_id": request_id, "type": "tts_queue","lang":lang,"text":text, "timestamp": str(datetime.now())}), callback=kafkaClient.delivery_report)
+        kafkaClient.producer.produce('tts_request_queue_topic', key=request_id, value=json.dumps({"request_id": request_id, "ip_address":ip_address, "user_agent":user_agent, "session_id":session_id, "user_id":user_id, "type": "tts_queue", "lang":lang, "text":text, "timestamp": str(datetime.now())}), callback=kafkaClient.delivery_report)
         kafkaClient.producer.flush()
         logging.info(f"Message produced successfully to tts-queue-topic.")
         return {"message": "Audio generation request has been sent to the queue.", "request_id": request_id}
@@ -100,7 +109,7 @@ async def get_audio(request: Request, text:str, lang:LangEnum, db: Session = Dep
 async def get_audio_for_request(request: Request, request_id:str, db: Session = Depends(get_db)):
     try:
         object_name=f"{request_id}.wav"
-        audio_data=read_object_from_minio(bucket_name='tts-audios', object_name=object_name)
+        audio_data=read_object_from_minio(bucket_name=MINIO_BUCKET, object_name=object_name)
         audio_stream = BytesIO(audio_data)
         return StreamingResponse(audio_stream, media_type="audio/wav", headers={"Content-Disposition": f"inline; filename={object_name}"})
     except Exception as e:
