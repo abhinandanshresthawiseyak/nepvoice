@@ -16,6 +16,7 @@ load_dotenv()
 TTS_URI=os.getenv('TTS')
 TTS_FILE_LOCATION=os.getenv('TTS_FILE_LOCATION')
 TTS_API_KEY=os.getenv('TTS_API_KEY')
+KAFKA_SERVER=os.getenv('KAFKA_SERVER')
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ def generate_tts_audio(text: str, language: str):
         raise HTTPException(status_code=500, detail=f"An error occurred while processing the audio file. {e}")
 
 try:
-    kafkaClient = KafkaClient(bootstrap_servers='192.168.88.40:19092')
+    kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
     kafkaClient.initialize_consumer(group_id='tts-consumer-group')
     kafkaClient.consumer.subscribe(['tts_streaming_request_queue_topic'])
     

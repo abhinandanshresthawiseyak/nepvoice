@@ -3,7 +3,12 @@ import time, json
 from datetime import datetime
 import logging
 import pusher
-import base64
+import base64, os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+KAFKA_SERVER = os.getenv("KAFKA_SERVER")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +22,7 @@ try:
         ssl=True
     )
     
-    kafkaClient = KafkaClient(bootstrap_servers='192.168.88.40:19092')
+    kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
     kafkaClient.initialize_consumer(group_id='tts-response-consumer-group')
     kafkaClient.consumer.subscribe(['tts_response_queue_topic'])
     

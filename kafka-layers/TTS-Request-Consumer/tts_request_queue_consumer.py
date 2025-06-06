@@ -1,14 +1,19 @@
 from backend.app.api.v2.handlers.feature_tts_handler import generate_tts_audio
 from backend.app.utils.kafkaclient import KafkaClient
 from backend.app.utils.minio_utils import upload_audio_to_minio
-import time, json, base64, logging
+import time, json, base64, logging, os
 from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+KAFKA_SERVER = os.getenv("KAFKA_SERVER")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
-    kafkaClient = KafkaClient(bootstrap_servers='192.168.88.40:19092')
+    kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
     kafkaClient.initialize_consumer(group_id='tts-consumer-group')
     kafkaClient.consumer.subscribe(['tts_request_queue_topic'])
     

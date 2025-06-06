@@ -1,12 +1,16 @@
 import boto3, io, os
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.client import Config
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 # Configuration (you can externalize this)
-MINIO_ENDPOINT = "http://192.168.88.40:7814"  # or "http://minio:9000" inside Docker network
-MINIO_ACCESS_KEY = "nepvoice"
-MINIO_SECRET_KEY = "nepvoice"
-MINIO_REGION = "us-east-1"
+MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT") # or "http://minio:9000" inside Docker network
+MINIO_ACCESS_KEY = os.getenv("MINIO_ACCESS_KEY")
+MINIO_SECRET_KEY = os.getenv("MINIO_SECRET_KEY")
+MINIO_REGION = os.getenv("MINIO_REGION")
 
 def upload_audio_to_minio(
     audio_bytes: bytes,
