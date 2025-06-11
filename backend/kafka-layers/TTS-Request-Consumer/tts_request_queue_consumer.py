@@ -1,11 +1,11 @@
-from backend.app.api.v2.handlers.feature_tts_handler import generate_tts_audio
-from backend.app.api.v2.handlers.features_handler import handle_feature_use
-from backend.app.utils.kafkaclient import KafkaClient
-from backend.app.utils.minio_utils import upload_audio_to_minio
+from app.api.v2.handlers.feature_tts_handler import generate_tts_audio
+from app.api.v2.handlers.features_handler import handle_feature_use
+from app.utils.kafkaclient import KafkaClient
+from app.utils.minio_utils import upload_audio_to_minio
 import time, json, base64, logging, os
 from datetime import datetime
 from dotenv import load_dotenv
-from backend.app.database.database import get_db
+from app.database.database import get_db
 
 load_dotenv()
 

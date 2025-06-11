@@ -1,23 +1,26 @@
-from backend.app.api.v2.handlers.feature_asr_handler import send_audio
-from backend.app.api.v2.handlers.features_handler import handle_feature_use
-from backend.app.utils.kafkaclient import KafkaClient
-from backend.app.utils.minio_utils import upload_audio_to_minio
+from app.api.v2.handlers.feature_asr_handler import send_audio
+from app.api.v2.handlers.features_handler import handle_feature_use
+from app.utils.kafkaclient import KafkaClient
+from app.utils.minio_utils import upload_audio_to_minio
 import time, json, base64, logging, os, io
 from datetime import datetime
 from dotenv import load_dotenv
-from backend.app.database.database import get_db
-
+from app.database.database import get_db
+from fastapi import HTTPException
+from app.models.models import ASRHistory
 load_dotenv()
 
 KAFKA_SERVER = os.getenv("KAFKA_SERVER")
-asr_OBJECT_PREFIX = os.getenv("ASR_OBJECT_PREFIX")
+ASR_OBJECT_PREFIX = os.getenv("ASR_OBJECT_PREFIX")
 MINIO_BUCKET = os.getenv("MINIO_BUCKET")
+ASR_ENGLISH = os.getenv("ASR_ENGLISH")
+ASR_NEPALI = os.getenv("ASR_NEPALI")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
-    db=get_db()
+    db=next(get_db())
     
     kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
     kafkaClient.initialize_consumer(group_id='asr-consumer-group')
@@ -95,9 +98,10 @@ try:
 
             # Step 5: Store transcript as .txt file so that frontend can access the text
             transcript_bytes = transcript_text.encode("utf-8")
-            bucket_name, object_name= upload_audio_to_minio(audio_bytes=io.BytesIO(transcript_bytes), bucket_name=MINIO_BUCKET, object_name=f"{ASR_OBJECT_PREFIX}/{data['request_id']}.txt")
+            # logger.info("transcription %s transcription_bytes length", transcript_text, len(transcript_bytes))
+            bucket_name, object_name= upload_audio_to_minio(audio_bytes=transcript_bytes, bucket_name=MINIO_BUCKET, object_name=f"{ASR_OBJECT_PREFIX}/{data['request_id']}.txt")
             
-            kafkaClient.producer.produce('asr_response_queue_topic', key=data['request_id'], value=json.dumps({'request_id':data['request_id'],'bucket_name':bucket_name ,'object_name':object_name, 'text':data['text'], 'language':data['lang'], 'audio_size':len(audio_bytes), 'created_at': str(datetime.now())}), callback=kafkaClient.delivery_report)
+            kafkaClient.producer.produce('asr_response_queue_topic', key=data['request_id'], value=json.dumps({'request_id':data['request_id'],'bucket_name':bucket_name ,'object_name':object_name, 'language':data['lang'], 'audio_size':len(audio_bytes), 'created_at': str(datetime.now())}), callback=kafkaClient.delivery_report)
             logger.info(f"Produced message at key {data['request_id']}")
         except Exception as e:
             logger.info(f"Error while polling messages: {e}")

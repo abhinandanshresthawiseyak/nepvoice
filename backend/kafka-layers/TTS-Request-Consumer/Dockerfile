@@ -8,5 +8,7 @@ WORKDIR /app
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-COPY kafka-layers/TTS-Response-Consumer/tts_response_queue_consumer.py /app/tts_response_queue_consumer.py
-CMD ["python", "tts_response_queue_consumer.py"]
+COPY kafka-layers/TTS-Request-Consumer/tts_request_queue_consumer.py /app/backend/tts_request_queue_consumer.py
+
+WORKDIR /app/backend
+CMD ["python", "tts_request_queue_consumer.py"]

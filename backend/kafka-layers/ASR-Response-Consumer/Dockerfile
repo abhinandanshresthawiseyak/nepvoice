@@ -8,5 +8,8 @@ WORKDIR /app
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-COPY kafka-layers/ASR-Response-Consumer/asr_response_queue_consumer.py /app/asr_response_queue_consumer.py
-CMD ["python", "asr_response_queue_consumer.py"]
+# COPY kafka-layers/ASR-Request-Consumer/asr_request_queue_consumer.py /app/asr_request_queue_consumer.py
+# CMD ["python", "asr_request_queue_consumer.py"]
+WORKDIR /app/backend
+
+CMD ["python", "-m", "kafka-layers.ASR-Response-Consumer.asr_response_queue_consumer"]

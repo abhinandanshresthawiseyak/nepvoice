@@ -1,10 +1,11 @@
-from backend.app.utils.kafkaclient import KafkaClient
+from app.utils.kafkaclient import KafkaClient
 import time, json
 from datetime import datetime
 import logging
 import pusher
 import base64, os
 from dotenv import load_dotenv
+from fastapi import HTTPException
 
 load_dotenv()
 
@@ -23,15 +24,15 @@ try:
     )
     
     kafkaClient = KafkaClient(bootstrap_servers=KAFKA_SERVER)
-    kafkaClient.initialize_consumer(group_id='tts-response-consumer-group')
-    kafkaClient.consumer.subscribe(['tts_response_queue_topic'])
+    kafkaClient.initialize_consumer(group_id='asr-response-consumer-group')
+    kafkaClient.consumer.subscribe(['asr_response_queue_topic'])
     
     kafkaClient.initialize_producer()
     
     logger.info("🔄 Listening for messages...")
     while True:
         try:
-            # logger.info(f"Running {running_tts} TTS tasks")
+            # logger.info(f"Running {running_asr} asr tasks")
             # Check kafka connection periodically maybe every 10 seconds
             if time.time() % 10 < 1:
                 logger.info("Checking Kafka connection...")

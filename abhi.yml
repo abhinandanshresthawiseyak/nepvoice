@@ -41,50 +41,50 @@ services:
     # environment:
     #   - KSQLDB_URL=http://abhi-nepvoice-ksqldb-server:8088
 
-  abhi-nepvoice-tts-streaming-request-consumer-1:
-    build:
-      context: .
-      dockerfile: kafka-layers/TTS-Streaming-Request-Consumer/Dockerfile
-    container_name: tts-streaming-request-consumer-1
-    volumes:
-      - ./backend:/app/backend
-      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
-    restart: unless-stopped
+  # abhi-nepvoice-tts-streaming-request-consumer-1:
+  #   build:
+  #     context: .
+  #     dockerfile: kafka-layers/TTS-Streaming-Request-Consumer/Dockerfile
+  #   container_name: tts-streaming-request-consumer-1
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+  #   restart: unless-stopped
 
-  abhi-nepvoice-tts-request-consumer-1:
-    build:
-      context: .
-      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
-    container_name: tts-request-consumer-1
-    volumes:
-      - ./backend:/app/backend
-      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
-    restart: unless-stopped
+  # abhi-nepvoice-tts-request-consumer-1:
+  #   build:
+  #     context: .
+  #     dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+  #   container_name: tts-request-consumer-1
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+  #   restart: unless-stopped
 
-  abhi-nepvoice-tts-request-consumer-2:
-    build:
-      context: .
-      dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
-    container_name: tts-request-consumer-2
-    volumes:
-      - ./backend:/app/backend
-      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
-    restart: unless-stopped
+  # abhi-nepvoice-tts-request-consumer-2:
+  #   build:
+  #     context: .
+  #     dockerfile: kafka-layers/TTS-Request-Consumer/Dockerfile
+  #   container_name: tts-request-consumer-2
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+  #   restart: unless-stopped
 
-  abhi-nepvoice-tts-response-consumer:
-    build:
-      context: .
-      dockerfile: kafka-layers/TTS-Response-Consumer/Dockerfile
-    container_name: tts-response-consumer
-    volumes:
-      - ./backend:/app/backend
-      # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
-    restart: unless-stopped
+  # abhi-nepvoice-tts-response-consumer:
+  #   build:
+  #     context: .
+  #     dockerfile: kafka-layers/TTS-Response-Consumer/Dockerfile
+  #   container_name: tts-response-consumer
+  #   volumes:
+  #     - ./backend:/app/backend
+  #     # - /home/mirage/wiseyak/abhi/nepvoice-abhi/tts_audios:/app/tts_audios
+  #   restart: unless-stopped
 
   abhi-nepvoice-asr-request-consumer-1:
     build:
       context: .
-      dockerfile: kafka-layers/ASR-Request-Consumer/Dockerfile
+      dockerfile: backend/kafka-layers/ASR-Request-Consumer/Dockerfile
     container_name: asr-request-consumer-1
     volumes:
       - ./backend:/app/backend
@@ -94,7 +94,7 @@ services:
   abhi-nepvoice-asr-response-consumer:
     build:
       context: .
-      dockerfile: kafka-layers/ASR-Response-Consumer/Dockerfile
+      dockerfile: backend/kafka-layers/ASR-Response-Consumer/Dockerfile
     container_name: asr-response-consumer
     volumes:
       - ./backend:/app/backend

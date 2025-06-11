@@ -7,9 +7,10 @@ from app.dependencies.current_user import get_current_user
 from dotenv import load_dotenv
 from app.core.enums import LangEnum
 from app.api.v2.handlers.feature_asr_handler import send_audio
-from app.utils.minio_utils import upload_audio_to_minio
+from app.utils.minio_utils import upload_audio_to_minio, read_object_from_minio
 from app.utils.kafkaclient import KafkaClient
-import logging
+import logging, uuid, random, json
+from datetime import datetime
 # Load environment variables
 load_dotenv()
 
@@ -47,7 +48,7 @@ async def speak_audio(request: Request, lang:LangEnum, audio_file: UploadFile = 
     base_id = str(uuid.uuid4())
     extra_random = str(random.randint(10**7, 10**8 - 1))  # ensures 8 digits
     request_id = f"{base_id}-{extra_random}"
-    user_id=current_user.id
+    user_id='admin_manual_1'
     
     try:
         # Read file content into bytes
@@ -60,3 +61,21 @@ async def speak_audio(request: Request, lang:LangEnum, audio_file: UploadFile = 
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred while processing the audio file. {e}")
+    
+    
+@router.get("/{request_id}", summary="Get transcript for a given request ID")
+# async def get_transcript(request_id: str, current_user: User = Depends(get_current_user)):
+async def get_transcript(request_id: str):
+    try:
+        object_name = f"{ASR_OBJECT_PREFIX}/{request_id}.txt"
+        
+        # Read the object from MinIO
+        text_content = read_object_from_minio(bucket_name=MINIO_BUCKET, object_name=object_name)
+        
+        if not text_content:
+            raise HTTPException(status_code=404, detail="Transcript not found or is empty.")
+
+        return {"request_id": request_id, "transcript": text_content}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch transcript: {e}")
